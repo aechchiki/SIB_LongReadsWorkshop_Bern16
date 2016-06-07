@@ -12,9 +12,10 @@ Topic: hands-on course on long reads sequencing
 - aims: reads extraction, quality control checking, mapping to reference genome, genome assembly
 
 Contributors: 
-- Julien Roux: Evolutionary Bioinformatics Group, UniL and SIB
-- Kamil Jaron: Evolutionary Bioinformatics Group, UniL and SIB
+- Amina Echchiki: Evolutionary Bioinformatics Group, UniL and SIB
 - Walid Gharib: Interfaculty Bioinformatics Unit, UniBe and SIB
+- Kamil Jaron: Evolutionary Bioinformatics Group, UniL and SIB
+- Julien Roux: Evolutionary Bioinformatics Group, UniL and SIB
 
 More info about the event:
 https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longreads
