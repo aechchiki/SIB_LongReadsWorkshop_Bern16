@@ -1,4 +1,4 @@
-# MinION 
+# MinION practical
 
 # data location 
 ls /archive/dee/robinson/jroux/MinION/Minion_Lambda_Library
@@ -35,9 +35,6 @@ module add UHTS/Analysis/poretools/0.5.1; poretools fastq input.fast5 > output.f
 #
 # cd /your_dir/MinION/basecalled_reads
 a=0; for i in $(ls *.fast5); do echo $i;a=$(echo $i | cut -d'.' -f1); echo $a; b=$((b + 1)); module add UHTS/Analysis/poretools/0.5.1; poretools fastq $i > $a'.fastq'; done
-# organize subfolders
-mkdir ./fast5; mkdir ./fastq
-mv *.fast5 ./fast5; mv *.fastq ./fastq
 
 # -
 # Q: How many resources does it take to convert fast5 to fastq?
@@ -56,3 +53,5 @@ less output.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawse
 #
 # cd /your_dir/MinION/basecalled_reads
 awk '{ total += $1; count++ } END { print total/count }' reads_length.txt > mean_readlength.txt
+# OR, more infos with poretools stats on fast5 directly
+module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
