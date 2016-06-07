@@ -7,7 +7,7 @@ ls /archive/dee/robinson/jroux/MinION/Minion_Lambda_Library
 
 ### read extraction
 
-# Q: I have .fast5, how to transform to .fastq? 
+# Q: I have .fast5, how to convert to .fastq? 
 # A: Use poretools on basecalled reads.
 
 # to install poretools:
@@ -24,10 +24,10 @@ python setup.py install --root ./ # must have write rights, ideally /home/user/b
 # module add UHTS/Analysis/poretools/0.5.1; poretools fastq input.fast5 > output.fastq
 
 # note: 
-# - poretools can also be used to transform to .fasta: write to output.fasta
+# - poretools can also be used to convert to .fasta: write to output.fasta
 # - can create one big .fastq for all the flowcell by defining *.fast5 as input (default: 1 .fast5 per pore)
 
-# Q: How many resources does it take to transform fast5 to fastq?
+# Q: How many resources does it take to convert fast5 to fastq?
 # A: For an archive of 256M (fast5), CPU time: 2.19 sec; Max Memory: 29.20 MB
 
 # Q: How to check the length of each read sequenced by MinION?
