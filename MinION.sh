@@ -48,4 +48,11 @@ mv *.fast5 ./fast5; mv *.fastq ./fastq
 # A: extract raw sequence from fastq, then count the number of characters per line
 #
 # cd /your_dir/MinION/basecalled_reads
-less output.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > reads_length.txt
+less output.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
+
+# -
+# Q: How to check the average length of the reads sequenced by MinION?
+# A: use extracted raw sequences character count, then calculate the mean
+#
+# cd /your_dir/MinION/basecalled_reads
+awk '{ total += $1; count++ } END { print total/count }' reads_length.txt > mean_readlength.txt
