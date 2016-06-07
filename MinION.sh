@@ -16,7 +16,7 @@ cd poretools
 python setup.py install --root ./ # must have write rights, ideally /home/user/bin
 # example
 # cd /your_dir/MinION/basecalled
-# /home/aechchik/bin/poretools/poretools fastq input.fast5 > output.fastq
+# /home/aechchik/bin/poretools/poretools/fastq.py input.fast5 > output.fastq
 
 # new! poretools is now on Vital-IT (thx Sébastien)
 # example 
@@ -28,7 +28,7 @@ python setup.py install --root ./ # must have write rights, ideally /home/user/b
 # - can create one big .fastq for all the flowcell by defining *.fast5 as input (default: 1 .fast5 per pore)
 
 # Q: How many resources does it take to convert fast5 to fastq?
-# A: For an archive of 256M (fast5), CPU time: 2.19 sec; Max Memory: 29.20 MB
+# A: For an archive of 256M (fast5), CPU time: 12.19 sec; Max Memory: 29.20 MB
 
 # Q: How to check the length of each read sequenced by MinION?
 # A: extract raw sequence from fastq, then count the number of characters per line
