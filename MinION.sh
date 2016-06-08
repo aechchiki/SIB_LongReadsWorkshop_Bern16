@@ -49,11 +49,13 @@ cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
 less LambdaBurnIn.2D.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
 
 # -
-# Q: How to check the average length of the reads sequenced by MinION?
-# A: use extracted raw sequences character count, then calculate the mean
+# Q: How to check some stats on the length of the reads sequenced by MinION?
+# A: use extracted raw sequences character count, then calculate the some stats
 #
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
-awk '{ total += $1; count++ } END { print total/count }' reads_length.txt > mean_readlength.txt
+awk '{ total += $1; count++ } END { print total/count }' readlength.txt # mean read length
+sort -nk 1 readlength.txt | head -n 1 # min read length
+sort -nrk 1 readlength.txt | head -n 1 # max read length
 # OR, more infos with poretools stats on fast5 directly
 # cd /your_dir/MinION/basecalled_reads
 # module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
