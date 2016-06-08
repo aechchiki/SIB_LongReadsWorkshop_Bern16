@@ -46,7 +46,7 @@ a=0; for i in $(ls *.fast5); do echo $i;a=$(echo $i | cut -d'.' -f1); echo $a; b
 # A: extract raw sequence from fastq, then count the number of characters per line
 #
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
-less output.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
+less LambdaBurnIn.2D.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
 
 # -
 # Q: How to check the average length of the reads sequenced by MinION?
