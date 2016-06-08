@@ -1,8 +1,17 @@
 # MinION practical
 
-# data location 
-ls /archive/dee/robinson/jroux/MinION/Minion_Lambda_Library
-# data already in .fastq
+# fast5 location 
+ls /home/jroux/archive/MinION/run_MinION_2015_06_15_Burn-In.tar
+# extract to my /scratch
+tar -xf /home/jroux/archive/MinION/run_MinION_2015_06_15_Burn-In.tar -C /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/data/
+
+# load needed modules for the session 
+module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
+# note: other nanopore tools are not installed in cluster, should I ask for them?
+module add UHTS/Aligner/bwa/0.7.13 # load bwa (alignment)
+module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
+module add SequenceAnalysis/SequenceAlignment/last/531 # load last (alignment)
+module add UHTS/Analysis/seqtk/2015.10.15 # fasatq to fasta
 
 
 ### read extraction
@@ -11,42 +20,38 @@ ls /archive/dee/robinson/jroux/MinION/Minion_Lambda_Library
 # Q: I have .fast5, how to convert to .fastq? 
 # A: Use poretools on basecalled reads.
 #
-# install poretools:
-git clone https://github.com/arq5x/poretools
-# check for write rights
-cd poretools; python setup.py install --root
-# example
-# cd /your_dir/MinION/basecalled_reads
-# /home/user/bin/poretools/poretools/fastq.py input.fast5 > output.fastq
+# to install poretools:
+# git clone https://github.com/arq5x/poretools
+# cd poretools; python setup.py install --root
 #
-# new! poretools is now on Vital-IT (thx Sébastien)
-# module add UHTS/Analysis/poretools/0.5.1
+# NOW poretools is now on Vital-IT (thx Sébastien)
+# module add UHTS/Analysis/poretools/0.5.1 # load poretools
 
 # -
 # Q: I want one big fastq containing all reads
 # A: Use direct globbing
 #
-# cd /your_dir/MinION/basecalled_reads
-module add UHTS/Analysis/poretools/0.5.1 # load poretools
-poretools fastq input.fast5 > output.fastq
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/data/Downloads_burnin
+poretools fastq *.fast5 > /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq/Lambda.fastq
 
 # -
 # Q: I want one fastq per fast5 input
 # A: Use bash loop instead
 #
-# cd /your_dir/MinION/basecalled_reads
-a=0; for i in $(ls *.fast5); do echo $i;a=$(echo $i | cut -d'.' -f1); echo $a; b=$((b + 1)); module add UHTS/Analysis/poretools/0.5.1; poretools fastq $i > $a'.fastq'; done
+# not advised
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/data/Downloads_burnin
+a=0; for i in $(ls *.fast5); do echo $i;a=$(echo $i | cut -d'.' -f1); echo $a; b=$((b + 1)); module add UHTS/Analysis/poretools/0.5.1; poretools fastq $i > /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq/$a'.fastq'; done
 
 # -
 # Q: How many resources does it take to convert fast5 to fastq?
-# A: For an archive of 256M (fast5), CPU time: 12.19 sec; Max Memory: 29.20 MB
+# A: Current archive contains 13G fast5. 0m43.505s CPU time
 
 # -
 # Q: How to check the length of each read sequenced by MinION?
 # A: extract raw sequence from fastq, then count the number of characters per line
 #
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
-less LambdaBurnIn.2D.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
+less Lambda.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
 
 # -
 # Q: How to check some stats on the length of the reads sequenced by MinION?
@@ -56,11 +61,9 @@ cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
 awk '{ total += $1; count++ } END { print total/count }' readlength.txt # mean read length
 sort -nk 1 readlength.txt | head -n 1 # min read length
 sort -nrk 1 readlength.txt | head -n 1 # max read length
-less LambdaBurnIn.2D.fastq | grep ^@ | grep .fast5$ | wc -l # how many reads in the input
+less Lambda.fastq | grep ^@ | grep .fast5$ | wc -l # how many reads in the inputq
 #
 # OR, more infos with poretools stats on fast5 directly
-# cd /your_dir/MinION/basecalled_reads
-# module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
 
 
 ### read alignment to reference
@@ -69,35 +72,37 @@ less LambdaBurnIn.2D.fastq | grep ^@ | grep .fast5$ | wc -l # how many reads in 
 # Q: How to align MinION reads to known reference?
 # A: Can use BWA (faster but less sensitive), or LAST (slower but more sensitive)
 
+# part 0: get ref genome 
+# 
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/Enterobacteria_phage_lambda_uid14204/NC_001416.fna
+mv NC_001416.fna Lambda_RefGenome.fa
+
 # part 1: BWA
 #
-# genome indexing 
-module add UHTS/Aligner/bwa/0.7.13 # load bwa
+# genome indexing for bwa
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome directory
-bwa index Lambda.fasta # create index
+bwa index Lambda_RefGenome.fa # create index
 # 
 # create fasta index for samtools
-module add UHTS/Analysis/samtools/1.3 # load samtools
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome directory
-samtools faidx Lambda.fasta # create index
+samtools faidx Lambda_RefGenome.fa # create index
 # 
 # run bwa, pipe to samtools 
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
-bwa mem -x ont2d /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta LambdaBurnIn.2D.fastq | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta -bS - | samtools sort -T Lambda.bwa -o Lambda.bwa.bam -
+bwa mem -x ont2d /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda_RefGenome.fa Lambda.fastq | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda_RefGenome.fa -bS - | samtools sort -T Lambda.bwa -o Lambda.bwa.bam -
 # options: -x define read type
 
 # part 2: LAST
 # 
 # genome indexing
-module add SequenceAnalysis/SequenceAlignment/last/531 # load last 
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome directory
-lastdb Lambda Lambda.fasta  # create index
+lastdb Lambda Lambda_RefGenome.fa  # create index
 # 
 # convert fastq to fasta for last
 # note: I tried it on fastq with -Q1 option (def fastq-sanger format) but got error 
-module add UHTS/Analysis/seqtk/2015.10.15
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq # move to genome
-seqtk seq -a LambdaBurnIn.2D.fastq > Lambda.fasta 
+seqtk seq -a Lambda.fastq > Lambda.fasta
 # 
 # run lastal on fasta reads
 lastal -q 1 -a 1 -b 1 /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda Lambda.fasta > Lambda.maf
@@ -108,9 +113,22 @@ lastal -q 1 -a 1 -b 1 /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_gen
 # 
 # convert maf to bam with complete CIGAR (matches and mismatches)
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
-module add UHTS/Analysis/samtools/1.3 # load samtools
-python /home/aechchik/bin/nanopore-scripts/maf-convert.py sam Lambda.maf | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta -bS - | samtools sort -T Lambda.last -o Lambda.last.bam -
+python /home/aechchik/bin/nanopore-scripts/maf-convert.py sam Lambda.maf | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda_RefGenome.fa -bS - | samtools sort -T Lambda.last -o Lambda.last.bam -
 
-
+# part 3: get basic statistics on alignment 
+#
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
+# bam sort
+samtools sort Lambda.bwa.bam > Lambda.bwa_sorted.bam
+samtools sort Lambda.last.bam > Lambda.last_sorted.bam
+# index on sorted bam 
+samtools index Lambda.bwa_sorted.bam
+samtools index Lambda.last_sorted.bam
+# get stats of sorted bam
+samtools stats Lambda.bwa_sorted.bam > Lambda.bwa.stats
+samtools stats Lambda.last_sorted.bam > Lambda.last.stats
+# get coverage from stats
+grep ^COV Lambda.bwa.stats > Lambda.bwa.coverage
+grep ^COV Lambda.last.stats > Lambda.last.coverage
 
 
