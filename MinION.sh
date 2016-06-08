@@ -27,7 +27,8 @@ cd poretools; python setup.py install --root
 # A: Use direct globbing
 #
 # cd /your_dir/MinION/basecalled_reads
-module add UHTS/Analysis/poretools/0.5.1; poretools fastq input.fast5 > output.fastq
+module add UHTS/Analysis/poretools/0.5.1 # load poretools
+poretools fastq input.fast5 > output.fastq
 
 # -
 # Q: I want one fastq per fast5 input
@@ -55,3 +56,49 @@ less output.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawse
 awk '{ total += $1; count++ } END { print total/count }' reads_length.txt > mean_readlength.txt
 # OR, more infos with poretools stats on fast5 directly
 module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
+
+
+### read alignment to reference
+
+# can use BWA (faster but less sensitive), or LAST (slower but more sensitive)
+
+# part 1: BWA
+#
+# genome indexing 
+module add UHTS/Aligner/bwa/0.7.13 # load bwa
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome directory
+bwa index Lambda.fasta # create index
+# 
+# create fasta index for samtools
+module add UHTS/Analysis/samtools/1.3 # load samtools
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome directory
+samtools faidx Lambda.fasta # create index
+# 
+# run bwa, pipe to samtools 
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
+bwa mem -x ont2d /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta LambdaBurnIn.2D.fastq | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta -bS - | samtools sort -T Lambda.bwa -o Lambda.bwa.bam -
+# options: -x define read type
+
+# part 2: LAST
+# 
+# genome indexing
+module add SequenceAnalysis/SequenceAlignment/last/531 # load last 
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genome directory
+lastdb Lambda Lambda.fasta  # create index
+# 
+# convert fastq to fasta for last
+module add UHTS/Analysis/seqtk/2015.10.15
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq # move to genome
+seqtk seq -a LambdaBurnIn.2D.fastq > Lambda.fasta 
+# 
+# run lastal on fasta reads
+lastal -q 1 -a 1 -b 1 /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda Lambda.fasta > Lambda.maf
+# options: -q = mismatch cost; -a = gap cost; -b = gap extension cost; -Q1 = read input in sanger-fastq format 
+#
+# get nanopore scripts 
+# cd /home/aechchik/bin/; git clone https://github.com/arq5x/nanopore-scripts.git
+# 
+# convert maf to bam with complete CIGAR (matches and mismatches)
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
+module add UHTS/Analysis/samtools/1.3 # load samtools
+python /home/aechchik/bin/nanopore-scripts/maf-convert.py sam Lambda.maf | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta -bS - | samtools sort -T Lambda.last -o Lambda.last.bam -
