@@ -60,7 +60,9 @@ module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_ou
 
 ### read alignment to reference
 
-# can use BWA (faster but less sensitive), or LAST (slower but more sensitive)
+# -
+# Q: How to align MinION reads to known reference?
+# A: Can use BWA (faster but less sensitive), or LAST (slower but more sensitive)
 
 # part 1: BWA
 #
@@ -87,6 +89,7 @@ cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome # move to genom
 lastdb Lambda Lambda.fasta  # create index
 # 
 # convert fastq to fasta for last
+# note: I tried it on fastq with -Q1 option (def fastq-sanger format) but got error 
 module add UHTS/Analysis/seqtk/2015.10.15
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq # move to genome
 seqtk seq -a LambdaBurnIn.2D.fastq > Lambda.fasta 
@@ -102,3 +105,7 @@ lastal -q 1 -a 1 -b 1 /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_gen
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
 module add UHTS/Analysis/samtools/1.3 # load samtools
 python /home/aechchik/bin/nanopore-scripts/maf-convert.py sam Lambda.maf | samtools view -T /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/ref_genome/Lambda.fasta -bS - | samtools sort -T Lambda.last -o Lambda.last.bam -
+
+
+
+
