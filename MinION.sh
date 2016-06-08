@@ -45,17 +45,18 @@ a=0; for i in $(ls *.fast5); do echo $i;a=$(echo $i | cut -d'.' -f1); echo $a; b
 # Q: How to check the length of each read sequenced by MinION?
 # A: extract raw sequence from fastq, then count the number of characters per line
 #
-# cd /your_dir/MinION/basecalled_reads
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
 less output.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > readlength.txt
 
 # -
 # Q: How to check the average length of the reads sequenced by MinION?
 # A: use extracted raw sequences character count, then calculate the mean
 #
-# cd /your_dir/MinION/basecalled_reads
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
 awk '{ total += $1; count++ } END { print total/count }' reads_length.txt > mean_readlength.txt
 # OR, more infos with poretools stats on fast5 directly
-module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
+# cd /your_dir/MinION/basecalled_reads
+# module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
 
 
 ### read alignment to reference
