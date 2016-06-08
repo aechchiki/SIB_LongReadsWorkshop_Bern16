@@ -56,6 +56,8 @@ cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/fastq
 awk '{ total += $1; count++ } END { print total/count }' readlength.txt # mean read length
 sort -nk 1 readlength.txt | head -n 1 # min read length
 sort -nrk 1 readlength.txt | head -n 1 # max read length
+less LambdaBurnIn.2D.fastq | grep ^@ | grep .fast5$ | wc -l # how many reads in the input
+#
 # OR, more infos with poretools stats on fast5 directly
 # cd /your_dir/MinION/basecalled_reads
 # module add UHTS/Analysis/poretools/0.5.1; poretools stats input.fast5 > stats_output.txt
