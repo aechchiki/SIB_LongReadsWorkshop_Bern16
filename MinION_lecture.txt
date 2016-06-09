@@ -8,3 +8,6 @@ About 2D sequencing, in summary:
 - dsDNA adapters = loading adapter + hairpin adapter 
 - 2D reads = "consensus". basecalling done using info from both ssDNA strands => more precision
 (note: there is an option to filter high quality 2D reads only while generating fastq, see man 1.4.2)
+
+TO DO: Ask Laurent Falquet if and what he will introduce about MinION. Maybe we need to introduce the technology
+
