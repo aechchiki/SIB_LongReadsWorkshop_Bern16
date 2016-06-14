@@ -14,6 +14,7 @@ module add UHTS/Aligner/bwa/0.7.13 # load bwa (alignment)
 module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
 module add SequenceAnalysis/SequenceAlignment/last/531 # load last (alignment)
 module add UHTS/Analysis/seqtk/2015.10.15 # fasatq to fasta
+module add UHTS/Quality_control/quast/4.1 # post-alignment control 
 # other software in my /home:
 ls /home/aechchik/bin
 # TODO: ask Sébastien to install them on Vital-IT?
@@ -87,7 +88,7 @@ grep ^COV Lambda.last.stats > Lambda.last.coverage
 awk '/^S/{print ">"$2"\n"$3}' Lambda2D_contigs.gfa | fold > Lambda2D_contigs.fa # convert contigs to fasta 
 
 # check assembly quality 
-/home/aechchik/bin/quast-3.2/quast.py -R  Lambda_RefGenome.fa Lambda2D_contigs.fa # scp pdf report?
+quast.py -R  Lambda_RefGenome.fa Lambda2D_contigs.fa # scp pdf report?
 
 # align reads to contigs?
 bwa index Lambda2D_contigs.fa
