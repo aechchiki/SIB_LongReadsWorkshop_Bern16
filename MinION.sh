@@ -3,10 +3,12 @@
 ### get the data
 
 # fast5 location 
-ls /home/jroux/archive/MinION/run_MinION_2015_06_15_Burn-In.tar
+ls /home/jroux/archive/MinION/ #run_MinION_2015_06_15_Burn-In.tar
 # extract to my /scratch
 tar -xf /home/jroux/archive/MinION/run_MinION_2015_06_15_Burn-In.tar -C /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/
-# fast5 are in the directory: 
+# touch files to keep them alive
+cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/
+find . -exec touch {} \;
 
 # load needed modules for the session 
 module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
