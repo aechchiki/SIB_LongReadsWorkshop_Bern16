@@ -8,7 +8,7 @@ https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longre
 
 ## Contributors: 
 - Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB
-- Walid Gharib: Interfaculty Bioinformatics Unit, UNIBe and SIB
+- Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB
 - Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB
 - Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB
 
@@ -21,10 +21,14 @@ The biological material that was sequenced using these two platforms is some DNA
 
 You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a **de-novo** genome assembly. Most of these steps will be performed on MinION data only, but the assembly step will also be performed on PacBio data.
 
-*TO DO Julien: describe quickly the sequencing protocol. Check how big was the fragmentation step for MinION. For pacBio, 10kb fragmentation or selection?*
+*TO DO Julien: describe quickly the sequencing protocol. Fragmentation with Covaris sonication to yield ~8kb fragments. Used 1ug for library preparation, but protocols exist for smaller amounts. For pacBio, 10kb fragmentation or selection? How long was the run? Desrcibe that the run produces ~500 raw fast5 files, which are uploaded to the cloud for basecalling. Then, new fast5 files (1 per read) downloaded back*
+
+<--
+Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
+-->
 
 ## How to connect to the vital-it cluster?
-*TO DO Walid. Mention that they can use their vital-IT account if they have one*
+*TO DO Walid. Probably they should not work on the home directory? In that case, tell them to create a directory at their name in ```/scratch/beegfs/weekly/```? Mention that they can use their vital-IT account if they have one.*
 
 ## Tools
 Although the long reads sequencing technologies are quite recent, there is already a variety of tools available for their analysis. In the practicals, we will make use of the following tools, which are convenient, fast and well-performing. But we strongly encourage you to try other tools as well for your own analyses!
@@ -59,81 +63,97 @@ To test if everything is fine for ```NanoOK```, these commands should work:
 
 ### Minimap
 * Paper: http://bioinformatics.oxfordjournals.org/content/early/2016/05/01/bioinformatics.btw152.full
+...
 
 ### Miniasm
+...
 
 ## Read extraction
-You will convert the MinION reads from their ```.fast5``` to a more readable ```.fastq``` format.
-
-*TO DO Julien: copy the files from /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/Downloads_burnin/ to my home directory. Rename them to remove the HiSeq header which is confusing... Make the directory readble only*
- 
-![Question](round-help-button.png)
-How many reads?
-
-*TO DO: take a small file (HiSeq_lambda_5830_1_ch12_file4_strand.fast5) and use hdf5 unix commands to visualize/summarize it*
-
+<!--
+DONE (Julien): 
+cd /scratch/beegfs/monthly/jroux/tp_long_reads/MinION_lambda_reads
+cp /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/Downloads_burnin/* .
+rename 'HiSeq_' '' *.fast5
+-->
 
 ![To do](wrench-and-hammer.png)
-Create a working directory
+First, create a working directory and create links to the raw sequencing files.
+
 ```sh
 mkdir -p lambda_minion/fast5/
-ln -s /home/jroux/.../*.fast5 lambda_minion/fast5/
+ln -s /scratch/beegfs/monthly/jroux/tp_long_reads/MinION_lambda_reads/*.fast5 lambda_minion/fast5/
+```
+![Question](round-help-button.png)
+Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
+
+![Tip](elemental-tip.png)
+You can get a glimpse of the structure and organization of a ```.fast5/``` file using the HDF5 command-line tools:
+```sh
+h5dump file.fast5 | less
+h5stat file.fast5
 ```
 
 ![To do](wrench-and-hammer.png)
-Extract the reads:
-```sh
-nanook extract -q -s lambda_minion
-```
+You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fasta```. This can be done with the ```nanook extract``` utility, and takes around 10 minutes.
+<!--
+nanook extract -fasta -s lambda
+-->
 
-What folder were created by nanoOK?
+![Question](round-help-button.png)
+What folders were created by ```nanoOK```? What do the ```2D```, ```Template``` and ```Complement``` folders represent?
 
-question: look at fastq file
-What does it mean? How many lines per read? How quality encoded? Does it look good?
+### Bonus (or at home):
+```.fasta``` files are nice and simple, but they do not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
+<!--
+nanook extract -fastq -s lambda
+-->
 
-What are Template / Complement / 2D reads folders?
-
+![Question](round-help-button.png)
+Do the quality scores seem to be improved in 2D reads? 
 
 ## Mapping to a reference genome
-The reference genome first needs to be indexed with the LAST aligner:
+You will download the lambda phage reference genome and map the reads to it using the ```LAST``` aligner. To map to a reference genome, the reference sequence first needs to be indexed.
+
 ```sh
 mkdir -p lambda_minion/reference/
 cd lambda_minion/reference/
 wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/Enterobacteria_phage_lambda_uid14204/NC_001416.fna
-mv NC_001416.fna lambda_ref_genome.fa
+mv NC_001416.fna lambda_ref_genome.fa # we rename the file to a clearer name
 lastdb -Q 0 lambda_ref_genome lambda_ref_genome.fa
-```
-
-Now launch the alignment:
-```
 cd ../../
+```
+![Tip](elemental-tip.png)
+The size of the indexed sequences can be visualized in the ```.sizes``` file.
+
+![To do](wrench-and-hammer.png)
+Now launch the alignment with ```LAST``` (default aligner) using the ```nanook align``` utility.
+
+<!--
 nanook align -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
-```
-What directory has been created? Whta does it contain? Look at a maf file
-*TO DO: try with other aligners? First need to index the reference*
-for BWA-MEM:
-```sh
-module add UHTS/Aligner/bwa/0.7.13
-bwa index referencename.fasta
-nanook align -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa -aligner bwa
-```
+-->
 
-Note: it is possible to specify the alignment parameters. default are:
-nanook align -s SampleDir -r referencename.fasta -alignerparams "-s 2 -T 0 -Q 0 -a 1"
+![Question](round-help-button.png)
+What directories have been created? What do they contain? Look at one randomly chosen alignment file. What is striking?
 
-TO DO? refer to LAST documentation?
+![Tip](elemental-tip.png)
+It is possible to specify to ```nanook align``` the alignment parameters to be used with ```LAST```, with the ```-alignerparams``` option. By default the parameters are ```-s 2 -T 0 -Q 0 -a 1```.
+
+### Bonus (or at home):
+You can try to align reads with other aligners. For example to use ```BWA-MEM```, you first need to load the corresponding module (```module add UHTS/Aligner/bwa/0.7.13```), create the index of the reference sequence (```bwa index reference.fasta```). Then you can launch ```nanook align``` with the ```-aligner bwa``` option.
 
 ## Statistics and QC report
-```sh
-nanook analyse -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
-```
-*Long! Problem? Missing module? Problem because only 1 read was analyzed?*
-nanoOK created a PDF directory. Open it.
+![To do](wrench-and-hammer.png)
+Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse utility```. If no PDF file is present in the ```latex_last_passfail/``` folder, you can generate it yourself with the ```pdflatex file.tex``` command (press enter everytime the program prompt you with a question).
 
-TO DO: questions to ask:
-What is most common error type (indels, homopolymer). Does it make sense?
-Is there a systematic error trend?
-(Some GC bias and repeated errors could be due to PCR)
+<!--
+nanook analyse -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
+pdflatex lambda_minion/latex_last_passfail/lambda_minion.tex
+-->
+
+*TO DO: questions on the report:
+
+What is most common error type (indels, homopolymer). Does it make sense? Is there a systematic error trend? (Some GC bias and repeated errors could be due to PCR?)
+*
 
 
 
