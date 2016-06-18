@@ -19,7 +19,7 @@ The aim of this practicals session is for you to get your hands on real long rea
 
 The biological material sequenced using these two platforms is DNA from the lambda phage (http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (see for example https://peerj.com/articles/2055/). However, it is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
 
-You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a **de-novo** genome assembly. Most of these steps will be performed on MinION data only, except the assembly step, which will also be performed on PacBio data for a comparison.
+You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a *de-novo* genome assembly. Most of these steps will be performed on MinION data only, except the assembly step, which will also be performed on PacBio data for a comparison.
 
 The MinION library preparation protocol is quite straighforward. After DNA fragmentation, the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: a Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. Here is Figure 1A of a paper (http://www.genetics.org/content/202/1/37) illustrating well the protocol: 
 
@@ -71,12 +71,12 @@ To test if everything is fine for ```NanoOK```, these commands should work:
 ### Minimap
 * Link to the paper: http://bioinformatics.oxfordjournals.org/content/early/2016/05/01/bioinformatics.btw152.full
 
-*TO DO Amina and Kamil*
+***TO DO Amina and Kamil***
 
 
 ### Miniasm
 
-*TO DO Amina and Kamil*
+***TO DO Amina and Kamil***
 
 
 ## Read extraction
@@ -176,23 +176,24 @@ Take some time to read and understand the report. Here are a few questions that 
 * Which are the most accurate: shortest or longuest reads?
 * Have a look at the coverage plot. Can the variation be explained by GC content differences?
 
-*TO DO: how to explain the uneven coverage, and the bump at 45kb? Emmanuel says some lambda DNA added as control in lib prep. Origin of replication? Check question asked to community: https://community.nanoporetech.com/posts/lambda-phage-burn-in-unev*
+***TO DO: how to explain the uneven coverage, and the bump at 45kb? Emmanuel says some lambda DNA added as control in lib prep. Origin of replication? Check question asked to community: https://community.nanoporetech.com/posts/lambda-phage-burn-in-unev***
 
 * Have a look at the k-mer over and under-represention analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
 ## Assembly: MinION
-*TO DO Amina and Kamil*
-Using the 3,068 2D reads only
-Small intro saying that this assembly should be trivial: 48kb genome and we have some reads of 20kb! We expect only one contig!
+***TO DO Amina and Kamil***
+
+Using the 3,068 2D reads only. Small intro saying that this assembly should be trivial: 48kb genome and we have some reads of 20kb! We expect only one contig!
 
 ## Assembly: PacBio
-*TO DO Amina and Kamil*
+***TO DO Amina and Kamil***
+
 Use only proof-read "reads of insert" (previously called "CCS" reads). 
 Might be a good idea to subsample to ~3,000 reads for a fair comparison of the technologies (and it will be faster)
 
-*TO DO: Emmanual has run a nanook analysis on these reads. transfer the PDF to your laptop using ```scp```. Couldn't do it because permissions not set up correctly (email sent to Emmanuel). *
+***TO DO: Emmanuel has done a nanook analysis on these reads. transfer the PDF to your laptop using ```scp```. Couldn't do it because permissions not set up correctly (email sent to Emmanuel).***
 
-*TO DO: Emmanuel told me the DNA fragments for PacBio were 10kb long. Is that made through sonication or size-selection?*
+***TO DO: Emmanuel told me the DNA fragments for PacBio were 10kb long. Is that made through sonication or size-selection?***
 
 ![Question](round-help-button.png)
 Have a look at the ```nanoOK``` report for these reads. How does it compare to the report made on MinION reads?
