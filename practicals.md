@@ -102,6 +102,16 @@ export PATH=/home/aechchik/bin/miniasm/:$PATH
 ```
 No additional tools are required by ```Miniasm```. 
 
+### Quast
+
+Quast is a quality assessment tool for genome assemblies. Running Quast on an assembly provides a detailed report in pdf format, giving precious statistics about the wanted assembly. 
+
+* Link to the paper: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/
+* GitHub page: https://github.com/ablab/quast
+* Quast manual: http://quast.bioinf.spbau.ru/manual
+
+The ```Quast``` module is installed on vital-IT. You can access the software by loading the module: ```module add UHTS/Quality_control/quast/4.1```. 
+
 
 ## Read extraction
 <!--
