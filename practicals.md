@@ -17,25 +17,32 @@ The aim of this practicals session is for you to get your hands on real long rea
 * Oxford Nanopore MinION
 * Pacific Bioscience RS II 
 
-The biological material that was sequenced using these two platforms is some DNA from the lambda phage (http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (see for example https://peerj.com/articles/2055/). However, it is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
+The biological material sequenced using these two platforms is DNA from the lambda phage (http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (see for example https://peerj.com/articles/2055/). However, it is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
 
-You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a **de-novo** genome assembly. Most of these steps will be performed on MinION data only, but the assembly step will also be performed on PacBio data.
+You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a **de-novo** genome assembly. Most of these steps will be performed on MinION data only, except the assembly step, which will also be performed on PacBio data for a comparison.
 
-*TO DO Julien: describe quickly the sequencing protocol. Fragmentation with Covaris sonication to yield ~8kb fragments. Used 1ug for library preparation, but protocols exist for smaller amounts. For pacBio, 10kb fragmentation or selection? How long was the run? Desrcibe that the run produces ~500 raw fast5 files, which are uploaded to the cloud for basecalling. Then, new fast5 files (1 per read) downloaded back*
+The MinION library preparation protocol is quite straighforward. After DNA fragmentation, the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: a Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. Here is Figure 1A of a paper (http://www.genetics.org/content/202/1/37) illustrating well the protocol: 
+
+![protocol](protocol.jpg)
+
+In the MinION experiment you are going to analyze, the lambda phage DNA was fragmented using sonication (Covaris) to yield ~8kb-long fragments. One microgram of fragmented DNA material was then used for library preparation, but protocols exist for smaller amounts of starting material. 
+
+The sequencing run produced a single ```.fast5``` file per pore. All files were then uploaded to the cloud for basecalling. The base-called files were downloaded back to vital-it. They are also in the ```.fast5``` format, but there is one file per read.
 
 <!--
 Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
 -->
 
 ## How to connect to the vital-it cluster?
-*TO DO Walid. Probably they should not work on the home directory? In that case, tell them to create a directory at their name in ```/scratch/beegfs/weekly/```? Mention that they can use their vital-IT account if they have one.*
+***TO DO Walid. Probably they should not work on the home directory? In that case, tell them to create a directory at their name in ```/scratch/beegfs/weekly/```? Mention that they can use their vital-IT account if they have one.***
 
 ## Tools
 Although the long reads sequencing technologies are quite recent, there is already a variety of tools available for their analysis. In the practicals, we will make use of the following tools, which are convenient, fast and well-performing. But we strongly encourage you to try other tools as well for your own analyses!
-### NanoOK
-*TO DO: short intro about this tool. Very helpful because allows numerous analyses. fast5 -> fasta/fastq extraction -> alignment -> stats and QC analysis). Note: made primarily for MinION, but easy to hack to use PacBio reads.*
 
-* Paper: http://bioinformatics.oxfordjournals.org/content/32/1/142.full
+### NanoOK
+This recent tool is quite helpful because it allows to perform multiple analyses very easily. This includes the extraction of read sequences from ```.fast5``` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads.
+
+* Link to the paper: http://bioinformatics.oxfordjournals.org/content/32/1/142.full
 * GitHub page: http://github.com/TGAC/NanoOK
 * Documentation: http://documentation.tgac.ac.uk/display/NANOOK/NanoOK
 
@@ -62,11 +69,15 @@ To test if everything is fine for ```NanoOK```, these commands should work:
 * Type ```lastal -h``` to see help text for LAST.
 
 ### Minimap
-* Paper: http://bioinformatics.oxfordjournals.org/content/early/2016/05/01/bioinformatics.btw152.full
-...
+* Link to the paper: http://bioinformatics.oxfordjournals.org/content/early/2016/05/01/bioinformatics.btw152.full
+
+*TO DO Amina and Kamil*
+
 
 ### Miniasm
-...
+
+*TO DO Amina and Kamil*
+
 
 ## Read extraction
 <!--
@@ -143,32 +154,64 @@ You can try to align reads with other aligners. For example to use ```BWA-MEM```
 
 ## Statistics and QC report
 ![To do](wrench-and-hammer.png)
-Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse utility```. If no PDF file is present in the ```latex_last_passfail/``` folder, you can generate it yourself with the ```pdflatex file.tex``` command (press enter everytime the program prompt you with a question).
+Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse``` utility. A PDF file should be created in the ```latex_last_passfail/``` folder. If it's not the case, you can generate it yourself with the ```pdflatex file.tex``` command (press enter everytime the program prompt you with a question).
 
 <!--
 nanook analyse -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
 pdflatex lambda_minion/latex_last_passfail/lambda_minion.tex
 -->
 
-*TO DO: questions on the report:*
-*What is most common error type (indels, homopolymer). Does it make sense? Is there a systematic error trend? (Some GC bias and repeated errors could be due to PCR?)*
+To download the report to your laptop:
+```sh
+scp username@prd.vital-it.ch:[path_to_file_on_vital_it] [path_to_file_on_laptop]
+```
 
-## Assembly
-* TO DO Amina and Kamil*
+![Question](round-help-button.png)
+Take some time to read and understand the report. Here are a few questions that will guide you:
+* What size is the longuest template read? Is that surprising?
+* What does the N50 values indicate us? Is that consistent with the size of the DNA fragments used to create the library?
+* What is most common error type within reads?
+* In comparison, the typical error rate reported for the Illumina sequencing technology is around 0.1%. For Sanger sequencing, it can be as low as 0.001%... An interesting comparison of error rates across platforms was recently published: http://bib.oxfordjournals.org/content/17/1/154
+* Why is the alignment rate of 2D reads higher than those of template and complement reads?
+* Which are the most accurate: shortest or longuest reads?
+* Have a look at the coverage plot. Can the variation be explained by GC content differences?
 
-## TO DOs
+*TO DO: how to explain the uneven coverage, and the bump at 45kb? Emmanuel says some lambda DNA added as control in lib prep. Origin of replication? Check question asked to community: https://community.nanoporetech.com/posts/lambda-phage-burn-in-unev*
+
+* Have a look at the k-mer over and under-represention analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
+
+## Assembly: MinION
+*TO DO Amina and Kamil*
+Using the 3,068 2D reads only
+Small intro saying that this assembly should be trivial: 48kb genome and we have some reads of 20kb! We expect only one contig!
+
+## Assembly: PacBio
+*TO DO Amina and Kamil*
+Use only proof-read "reads of insert" (previously called "CCS" reads). 
+Might be a good idea to subsample to ~3,000 reads for a fair comparison of the technologies (and it will be faster)
+
+*TO DO: Emmanual has run a nanook analysis on these reads. transfer the PDF to your laptop using ```scp```. Couldn't do it because permissions not set up correctly (email sent to Emmanuel). *
+
+*TO DO: Emmanuel told me the DNA fragments for PacBio were 10kb long. Is that made through sonication or size-selection?*
+
+![Question](round-help-button.png)
+Have a look at the ```nanoOK``` report for these reads. How does it compare to the report made on MinION reads?
+
+
+<!--
+TO DOs
 * check this paper https://dx.doi.org/10.7554/eLife.14258
 * check the porecamp material (analysis part): http://porecamp.github.io/timetable.html
-* Will these be needed?
+* Check Pradervand talk: http://edu.isb-sib.ch/pluginfile.php/3390/course/section/1574/Pradervand_Sequencing_CUSO2015.pdf
+* Will these modules be needed?
 ```sh
 module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
-module add UHTS/Aligner/bwa/0.7.13 # load bwa (alignment)
 module add UHTS/PacBio/blasr/20140829;
 module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
 module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 ```
+* Idea: make them download maf files and reference genome, and open in IGV... Or is it possible to generate a picture on vital-it from IGV?
 
-<!--
 ![Question](round-help-button.png)
 ![Tip](elemental-tip.png)
 ![To do](wrench-and-hammer.png)
