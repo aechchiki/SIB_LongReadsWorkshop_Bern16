@@ -23,7 +23,7 @@ You will go through different steps, which include the extraction of reads from 
 
 *TO DO Julien: describe quickly the sequencing protocol. Fragmentation with Covaris sonication to yield ~8kb fragments. Used 1ug for library preparation, but protocols exist for smaller amounts. For pacBio, 10kb fragmentation or selection? How long was the run? Desrcibe that the run produces ~500 raw fast5 files, which are uploaded to the cloud for basecalling. Then, new fast5 files (1 per read) downloaded back*
 
-<--
+<!--
 Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
 -->
 
@@ -102,8 +102,8 @@ nanook extract -fasta -s lambda
 ![Question](round-help-button.png)
 What folders were created by ```nanoOK```? What do the ```2D```, ```Template``` and ```Complement``` folders represent?
 
-### Bonus (or at home):
-```.fasta``` files are nice and simple, but they do not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
+### Bonus (or at home)
+The ```.fasta``` format is nice and simple, but does not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
 <!--
 nanook extract -fastq -s lambda
 -->
@@ -138,8 +138,8 @@ What directories have been created? What do they contain? Look at one randomly c
 ![Tip](elemental-tip.png)
 It is possible to specify to ```nanook align``` the alignment parameters to be used with ```LAST```, with the ```-alignerparams``` option. By default the parameters are ```-s 2 -T 0 -Q 0 -a 1```.
 
-### Bonus (or at home):
-You can try to align reads with other aligners. For example to use ```BWA-MEM```, you first need to load the corresponding module (```module add UHTS/Aligner/bwa/0.7.13```), create the index of the reference sequence (```bwa index reference.fasta```). Then you can launch ```nanook align``` with the ```-aligner bwa``` option.
+### Bonus (or at home)
+You can try to align reads with other aligners. For example to use ```BWA-MEM```, you first need to load the corresponding module on vital-it (```module add UHTS/Aligner/bwa/0.7.13```), create the index of the reference sequence (```bwa index reference.fasta```). Then you can relaunch ```nanook align``` with the ```-aligner bwa``` option.
 
 ## Statistics and QC report
 ![To do](wrench-and-hammer.png)
@@ -150,22 +150,16 @@ nanook analyse -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
 pdflatex lambda_minion/latex_last_passfail/lambda_minion.tex
 -->
 
-*TO DO: questions on the report:
-
-What is most common error type (indels, homopolymer). Does it make sense? Is there a systematic error trend? (Some GC bias and repeated errors could be due to PCR?)
-*
-
-
+*TO DO: questions on the report:*
+*What is most common error type (indels, homopolymer). Does it make sense? Is there a systematic error trend? (Some GC bias and repeated errors could be due to PCR?)*
 
 ## Assembly
-TO DO: refer to minimap/miniasm paper
+* TO DO Amina and Kamil*
 
-
-
-TO DO: check this paper https://dx.doi.org/10.7554/eLife.14258
-TO DO: check the porecamp material (analysis part): http://porecamp.github.io/timetable.html
-
-TO DO: needed?
+## TO DOs
+* check this paper https://dx.doi.org/10.7554/eLife.14258
+* check the porecamp material (analysis part): http://porecamp.github.io/timetable.html
+* Will these be needed?
 ```sh
 module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
 module add UHTS/Aligner/bwa/0.7.13 # load bwa (alignment)
@@ -174,10 +168,9 @@ module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
 module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 ```
 
+<!--
 ![Question](round-help-button.png)
 ![Tip](elemental-tip.png)
 ![To do](wrench-and-hammer.png)
 ![Warning](warning.png)
-
-<!--
 -->
