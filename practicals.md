@@ -104,7 +104,7 @@ No additional tools are required by ```Miniasm```.
 
 ### Quast
 
-Quast is a quality assessment tool for genome assemblies. Running Quast on an assembly provides a detailed report in pdf format, giving precious statistics about the wanted assembly. 
+Quast is a quality assessment tool for genome assemblies. Running Quast on an assembly provides a detailed report about the statistics of the assembly, in pdf format.
 
 * Link to the paper: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/
 * GitHub page: https://github.com/ablab/quast
