@@ -15,7 +15,7 @@ https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longre
 ## Introduction
 The aim of this practicals session is for you to get your hands on real long reads sequencing data generated from two different technologies:
 * Oxford Nanopore MinION
-* Pacific Bioscience RS II 
+* Pacific Biosciences RSII 
 
 The biological material sequenced using these two platforms is DNA from the lambda phage (http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (see for example https://peerj.com/articles/2055/). However, it is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
 
@@ -192,12 +192,12 @@ scp username@prd.vital-it.ch:[path_to_file_on_vital_it] [path_to_file_on_laptop]
 
 ![Question](round-help-button.png)
 Take some time to read and understand the report. Here are a few questions that will guide you:
-* What size is the longuest template read? Is that surprising?
+* What size is the longest template read? Is that surprising?
 * What does the N50 values indicate us? Is that consistent with the size of the DNA fragments used to create the library?
 * What is most common error type within reads?
 * In comparison, the typical error rate reported for the Illumina sequencing technology is around 0.1%. For Sanger sequencing, it can be as low as 0.001%... An interesting comparison of error rates across platforms was recently published: http://bib.oxfordjournals.org/content/17/1/154
 * Why is the alignment rate of 2D reads higher than those of template and complement reads?
-* Which are the most accurate: shortest or longuest reads?
+* Which are the most accurate: shortest or longest reads?
 * Have a look at the coverage plot. Can the variation be explained by GC content differences?
 
 ***TO DO: how to explain the uneven coverage, and the bump at 45kb? Emmanuel says some lambda DNA added as control in lib prep. Origin of replication? Check question asked to community: https://community.nanoporetech.com/posts/lambda-phage-burn-in-unev***
