@@ -68,39 +68,16 @@ To test if everything is fine for ```NanoOK```, these commands should work:
 * Type ```h5dump -h``` to see if HDF5 tools are installed.
 * Type ```lastal -h``` to see help text for LAST.
 
-### Minimap
+### Canu
 
-Minimap is a recent long reads mapper. Its advantage is in being faster than most available aligners, while finding similar best mapping positions. The reason for higher speed is the lack of alignment phase, which can be useful for quick identification of long aproximate matching, although not replacing mainstream aligners. Note: this software was designed for both MinION and PacBio data.
+Canu is an assembler for high-noise long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and PacBio data.
 
-* Link to the paper: http://bioinformatics.oxfordjournals.org/content/early/2016/05/01/bioinformatics.btw152.full
-* GitHub page: https://github.com/lh3/minimap
+* Link to the paper: http://www.nature.com/nbt/journal/v33/n6/abs/nbt.3238.html
+* GitHub page: https://github.com/marbl/canu
+* Canu manual: http://canu.readthedocs.io/en/stable/
 
-The ```Minimap``` module is not yet installed on vital-IT, but you can access the software at this path: ```/home/aechchik/bin/minimap/```. 
+The ```Canu``` module is installed on vital-IT. You can access the software by loading the module: ```module add UHTS/Assembler/canu/1.2```. 
 
-![To do](wrench-and-hammer.png)
-To make it work, you need to set up the following environment variables:
-```sh
-export MINIMAP_DIR=/home/aechchik/bin/minimap/
-export PATH=/home/aechchik/bin/minimap/:$PATH
-```
-No additional tools are required by ```Minimap```. 
-
-### Miniasm
-
-Miniasm is a recent noisy long reads de novo assembler. It outputs the approximate positions of trimmed reads on the resulting unitigs, while being faster than other available assemblers. The reason for higher speed is the lack of consensus step. Note: this software was designed for both MinION and PacBio data.
-
-* Link to the paper: http://bioinformatics.oxfordjournals.org/content/early/2016/05/01/bioinformatics.btw152.full
-* GitHub page: https://github.com/lh3/miniasm
-
-The ```Miniasm``` module is not yet installed on vital-IT, but you can access the software at this path: ```/home/aechchik/bin/miniasm/```. 
-
-![To do](wrench-and-hammer.png)
-To make it work, you need to set up the following environment variables:
-```sh
-export MINIASM_DIR=/home/aechchik/bin/miniasm/
-export PATH=/home/aechchik/bin/miniasm/:$PATH
-```
-No additional tools are required by ```Miniasm```. 
 
 ### Quast
 
