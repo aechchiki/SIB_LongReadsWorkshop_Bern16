@@ -192,9 +192,54 @@ Take some time to read and understand the report. Here are a few questions that 
 * Have a look at the k-mer over and under-represention analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
 ## Assembly: MinION
-***TO DO Amina and Kamil***
 
+We will use Canu for MinION data assembly, then check the assembly quality using the report provided by Quast. 
+
+***TO DO Amina and Kamil***
 Using the 3,068 2D reads only. Small intro saying that this assembly should be trivial: 48kb genome and we have some reads of 20kb! We expect only one contig!
+
+TODO: why only 2D reads
+
+Part 1: Assembly
+
+```sh
+# move to directory with extracted MinION 2D reads
+cd <path/to/Lambda2D.fastq> 
+# load the assembler module
+module add UHTS/Assembler/canu/1.2
+# run the assembly
+canu -p Lambda2D_canu -d Lambda2D_canu genomeSize=48k -nanopore-raw Lambda2D.fastq -useGrid=false
+# parameters:	-p : use specified prefix to name canu output files
+#				-d : use specified prefix for output directories 
+#				genomeSize: expected genome size (from reference)
+#				-nanopore-raw : specifies ONT MinION data 
+#				-useGrid=false : disables automatic submission to LSF 
+```
+Expected runtime: about 5 minutes. 
+
+The output is a directory containing several files. The most interesting ones are:
+- *.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
+- *.trimmedReads.fastq : file containing the sequences after correction and final trimming
+- *.layout : file containing informations abount read inclusion in the final assembly
+- *.gfa : file containing the assembly graph by Canu
+- *.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
+
+Part 2: Assembly quality
+
+We will use the information in *.contigs.fasta to generate the assembly report.
+
+```sh
+# load the quality assessment module 
+module add UHTS/Quality_control/quast/4.1
+# generate the report 
+quast.py -R <path/to/reference_genome> *.contigs.fasta
+```
+
+The output is a directory, typically ```quast_results/<date_of_launch>``` containing several files. The most interesting for us is the report in pdf format. We can copy it to the local machine using ```scp```. 
+
+TODO: interesting questions about the report?
+
+
 
 ## Assembly: PacBio
 ***TO DO Amina and Kamil***
