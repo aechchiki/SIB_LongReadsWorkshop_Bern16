@@ -240,12 +240,63 @@ The output is a directory, typically ```quast_results/<date_of_launch>``` contai
 TODO: interesting questions about the report?
 
 
-
 ## Assembly: PacBio
-***TO DO Amina and Kamil***
 
+***TO DO Amina and Kamil***
 Use only proof-read "reads of insert" (previously called "CCS" reads). 
 Might be a good idea to subsample to ~3,000 reads for a fair comparison of the technologies (and it will be faster)
+
+Part 0: Subset reads of insert
+
+TODO: why to subset? (make it comparable)
+
+```sh
+# move to directory with PacBio data
+cd <path/to/PacBio_data>
+# check how many reads in the MinION 2D dataset
+less <path/to/Lambda2D.fastq> | grep .fast5$ | wc -l  #answer: 3068
+# select the same number of reads from PacBio data 
+awk "BEGIN {print 3068*4}" # print how many rows to process (! fastq format: 1 seqeunce = 4 lines)
+# extract subset of data from original Reads of Insert file
+head -n 12272 reads_of_insert.fastq > LambdaRI.fastq
+```
+
+Part 1: Assembly
+
+```sh
+# move to directory with extracted PacBio "Reads of Insert"
+cd <path/to/LambdaRI.fastq> 
+# load the assembler module
+module add UHTS/Assembler/canu/1.2
+# run the assembly
+canu -p LambdaRI_canu -d LambdaRI_canu genomeSize=48k -pacbio-raw LambdaRI.fastq -useGrid=false
+# parameters:	-p : use specified prefix to name canu output files
+#				-d : use specified prefix for output directories 
+#				genomeSize: expected genome size (from reference)
+#				-pacbio-raw : specifies ONT MinION data 
+#				-useGrid=false : disables automatic submission to LSF 
+```
+Expected runtime: about 5 minutes. 
+
+Part 2: Assembly quality
+
+We will use the information in *.contigs.fasta to generate the assembly report.
+
+```sh
+# load the quality assessment module 
+module add UHTS/Quality_control/quast/4.1
+# generate the report 
+quast.py -R <path/to/reference_genome> *.contigs.fasta
+```
+
+The output is a directory, typically ```quast_results/<date_of_launch>``` containing several files. The most interesting for us is the report in pdf format. We can copy it to the local machine using ```scp```. 
+
+TODO: interesting questions about the report?
+
+
+TODO: questions on comparison of the assemblies 
+
+
 
 ***TO DO: Emmanuel has done a nanook analysis on these reads. transfer the PDF to your laptop using ```scp```. Couldn't do it because permissions not set up correctly (email sent to Emmanuel).***
 
