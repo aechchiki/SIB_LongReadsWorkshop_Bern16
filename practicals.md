@@ -185,9 +185,9 @@ Take some time to read and understand the report. Here are a few questions that 
 * In comparison, the typical error rate reported for the Illumina sequencing technology is around 0.1%. For Sanger sequencing, it can be as low as 0.001%... An interesting comparison of error rates across platforms was recently published: http://bib.oxfordjournals.org/content/17/1/154
 * Why is the alignment rate of 2D reads higher than those of template and complement reads?
 * Which are the most accurate: shortest or longest reads?
-* Have a look at the coverage plot. Can the variation be explained by GC content differences?
+* Have a look at the coverage plot. There is a "bump" in coverage around 45kb. This corresponds to some control spike-in DNA that was added during library preparation (more precisely around 3.6kb of a region of the lambda phage genome, with a single mutation G45352A). Can additional variation be explained by GC content differences?
 
-***TO DO: how to explain the uneven coverage, and the bump at 45kb? Emmanuel says some lambda DNA added as control in lib prep. Origin of replication? Check question asked to community: https://community.nanoporetech.com/posts/lambda-phage-burn-in-unev***
+*TO DO: tell them to have a look at alignments in this region to see the mutation?*
 
 * Have a look at the k-mer over and under-represention analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
