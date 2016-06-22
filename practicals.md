@@ -33,8 +33,49 @@ The sequencing run produced a single ```.fast5``` file per pore. All files were 
 Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
 -->
 
-## How to connect to the vital-it cluster?
-***TO DO Walid. Probably they should not work on the home directory? In that case, tell them to create a directory at their name in ```/scratch/beegfs/weekly/```? Mention that they can use their vital-IT account if they have one.***
+## ![To do](wrench-and-hammer.png)How to connect to the Vital-it cluster?
+
+By now, you should have received a username and password to access the high performance computing cluster of the SIB (Vital-it).
+
+Note 1: Even if you have access to another cluster, you will not be able to access the data which is stored on Vital-it so all participants should connect to the latter.
+
+Note 2: Obviously, you can use your own Vital-it account if you have one...
+
+In order to connect to the cluster and set up your working directory follow the next steps:
+
+### 1- For Unix/Mac users
+
+a- type:
+```ssh <username>@prd.vital-it.ch```
+
+b- you will prompt for password: 
+```<username>@prd.vital-it.ch's password:```
+
+type in your password (you will not see what you are typing) and press enter.
+
+c- You are in (jump to point 3-)
+
+### 2- For Windows users
+You should have a ssh client e.g. PuTTY.
+
+a- if you already have it, I assume you know how to use it (Connect to Vital-it and go to point 3)
+
+b- if you don't have an ssh client, follow the following link steps and when done proceed to point 3. https://github.com/wgharib/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf
+
+### 3- Setting up your working directory:
+
+On Vital-it, it is highly recommended yet mandatory to read and write in the ```/scratch```directory:
+
+- move to ```/scratch```: 
+    
+    ```cd /scratch/beegfs/weekly/```
+
+- create your own directory:
+    
+    ```mkdir <username> ; cd <username>```
+
+- You will always be working from this directory. Before launching commands please be sure that youre located in the right directory by typing:
+    ```pwd```, expected output: ```/scratch/beegfs/weekly/<username>```
 
 ## Tools
 Although the long reads sequencing technologies are quite recent, there is already a variety of tools available for their analysis. In the practicals, we will make use of the following tools, which are convenient, fast and well-performing. But we strongly encourage you to try other tools as well for your own analyses!
