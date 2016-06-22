@@ -60,7 +60,7 @@ You should have a ssh client e.g. PuTTY.
 
 a- if you already have it, I assume you know how to use it (Connect to Vital-it and go to point 3)
 
-b- if you don't have an ssh client, follow the following link steps and when done proceed to point 3. https://github.com/wgharib/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf
+b- if you don't have an ssh client, follow the following link steps and when done proceed to point 3. https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf
 
 ### 3- Setting up your working directory:
 
