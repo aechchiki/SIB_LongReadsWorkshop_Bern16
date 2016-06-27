@@ -18,9 +18,9 @@ The aim of this practicals session is for you to get your hands on real long rea
 
 The biological material sequenced using these two platforms is DNA from the lambda phage (http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (see for example https://peerj.com/articles/2055/). However, its genome is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
 
-You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a *de-novo* genome assembly. Most of these steps will be performed on MinION data only, except the assembly step, which will also be performed on PacBio data for a comparison.
+You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a *de-novo* genome assembly.
 
-The MinION library preparation protocol is quite straighforward. After DNA fragmentation, the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: a Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. Here is Figure 1A of a paper (http://www.genetics.org/content/202/1/37) illustrating well the protocol: 
+The MinION library preparation protocol starts by DNA fragmentation, then the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: a Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. Here is Figure 1A of a paper (http://www.genetics.org/content/202/1/37) illustrating well the protocol: 
 
 ![protocol](img/protocol.jpg)
 
@@ -76,40 +76,50 @@ On Vital-it, it is highly recommended yet mandatory to read and write in the ```
 * You will always be working from this directory. Before launching commands please be sure that youre located in the right directory by typing:
     ```pwd```, expected output: ```/scratch/beegfs/weekly/<username>```
 
-## tools to sort
+## 1. Read extraction
 
-### NanoOK
-This recent tool is quite helpful because it allows to perform multiple analyses very easily. This includes the extraction of read sequences from ```.fast5``` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads.
+The output of MinION and PacBio RSII is stored in Hierarchical Data Format, what is basically an achive format (like `.zip` or `.tar`), but with very quick access to its content (You can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). In those files are more details about reads and basecalling. What, we need is just a simple `.fastq` for downstream analysis.
 
-* Link to the paper: http://bioinformatics.oxfordjournals.org/content/32/1/142.full
-* GitHub page: http://github.com/TGAC/NanoOK
-* Documentation: http://documentation.tgac.ac.uk/display/NANOOK/NanoOK
+**fast5**
+
+MinION basecaller produces one file per read. In the file there is a time series of a current used for basecalling, basecalled template and complement reads (also called 1D reads) and consensus of 1D reads called 2D reads with comparably higher accuracy.
+
+**bas.h5 & bax.h5**
+
+RS2 system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio anounced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RSII will be still in `.h5` formats we are going to work with.
+
+
+### Tools
+
+**NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from ```.fast5``` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on its [GitHub page](http://github.com/TGAC/NanoOK) and all details in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
 
 ```sh
 module add UHTS/Analysis/NanoOK/0.72;
 ```
 
-## 1. Read extraction
-
-<why read extractoin>
-
-### Tools
-
-poretools / nano ok????
+**pbh5tools**
+are a python scripts for extracting `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. Scripts allow filtering based on error rate, read length and read type. Read types of SMRT cell are
 
 <!--
-DONE (Julien): 
-cd /scratch/beegfs/monthly/jroux/tp_long_reads/MinION_lambda_reads
-cp /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/Downloads_burnin/* .
-rename 'HiSeq_' '' *.fast5
+syntax of scripts to tools?
+
+text or picture??
+
+- polymerase reads: The full read
+- subreads: Sebreads separated by cutting out adapters.
+- circular consensus read: The consensus seqeunce of subreads. Note, that `ccs` seqeunce does not have to be computed in the `h5` files.
 -->
 
+![protocol](img/pb_reads.png)
+
+### MinION
+
 ![To do](img/wrench-and-hammer.png)
-First, create a working directory and create links to the raw sequencing files.
+First, create a working directory for both PacBio and MinION raw reads and create links to the raw sequencing files.
 
 ```sh
 mkdir -p lambda_minion/fast5/
-ln -s /scratch/beegfs/monthly/jroux/tp_long_reads/MinION_lambda_reads/*.fast5 lambda_minion/fast5/
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/minion_lambda_reads/*.fast5 lambda_minion/fast5/
 ```
 ![Question](img/round-help-button.png)
 Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
@@ -119,7 +129,8 @@ ls lambda_minion/fast5/ | wc -l
 ```
 
 ![Tip](img/elemental-tip.png)
-The `fast5` is a special type of `h5` format, what is an indexed hierarchical format for complicated data. Basically it is a quick access file system (You can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). You can get a glimpse of the structure and organization of a ```.fast5/``` file using the HDF5 command-line tools:
+You can get a glimpse of the structure and organization of a ```.fast5/``` file using the HDF5 command-line tools:
+
 ```sh
 h5dump file.fast5 | less
 h5stat file.fast5
@@ -129,11 +140,12 @@ h5stat file.fast5
 You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fasta```. This can be done with the ```nanook extract``` utility, and takes around 10 minutes.
 
 ```sh
-nanook extract -fasta -s lambda
+bsub -q priority nanook extract -fasta -s lambda_minion
 ```
 
 ![Question](img/round-help-button.png)
 What folders were created by ```nanoOK```? What do the ```2D```, ```Template``` and ```Complement``` folders represent?
+
 
 ### Bonus (or at home)
 The ```.fasta``` format is nice and simple, but does not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
@@ -145,11 +157,39 @@ nanook extract -fastq -s lambda
 ![Question](img/round-help-button.png)
 Do the quality scores seem to be improved in 2D reads? 
 
-![help](img/help.png) Do you want to take a shorcut? If yes, just execute
+![Tip](img/elemental-tip.png)
+To access quality values, you can use `fastqc` known from Illumina data. Reported stats are correct, just keep in mind, that waring flags in the report are for assemly by short reads and therefore not very informative.
+
+### PacBio
+```{bash}
+module add UHTS/PacBio/pbh5tools/0.8.0;
+```
+
+![To do](img/wrench-and-hammer.png) Extract also PacBio reads using 
+
+```sh
+mkdir -p lambda_pacbio/raw_reads/
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/pacbio_lambda_reads/*.h5 lambda_pacbio/raw_reads/
+```
+
+![Question](img/round-help-button.png)
+How reads of many SMRT cells we have? [1]
+
+![To do](img/wrench-and-hammer.png) Extract PacBio reads using `bash5tools.py` from `pbh5tools`.
+
+```sh
+bsub -q priority bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq
+```
+
+![Question](img/round-help-button.png)
+How many reads has was produced by the SMRT cell? [132269]
+
+![help](img/help.png) If you are lost and if you want to catch up on others, just execute
 
 ```
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_read_extraction.sh
 ```
+
 ## Mapping to a reference genome
 You will download the lambda phage reference genome and map the reads to it using the ```LAST``` aligner. To map to a reference genome, the reference sequence first needs to be indexed.
 
@@ -167,9 +207,9 @@ The size of the indexed sequences can be visualized in the ```.sizes``` file.
 ![To do](img/wrench-and-hammer.png)
 Now launch the alignment with ```LAST``` (default aligner) using the ```nanook align``` utility.
 
-<!--
+```sh
 nanook align -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
--->
+```
 
 ![Question](img/round-help-button.png)
 What directories have been created? What do they contain? Look at one randomly chosen alignment file. What is striking?
@@ -218,7 +258,9 @@ Take some time to read and understand the report. Here are a few questions that 
 * GitHub page: https://github.com/marbl/canu
 * Canu manual: http://canu.readthedocs.io/en/stable/
 
-The ```Canu``` module is installed on vital-IT. You can access the software by loading the module: ```module add UHTS/Assembler/canu/1.2```. 
+```
+module add UHTS/Assembler/canu/1.3;
+``` 
 
 
 ### 1. MinION

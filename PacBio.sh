@@ -3,21 +3,26 @@
 ### get the data 
 
 # reads location
-ls /home/jroux/archive/MinION/ #LambdaPacBio.tgz
-# extract to my /scratch
-tar -xzf /home/jroux/archive/MinION/LambdaPacBio.tgz -C /scratch/beegfs/monthly/aechchik/SIB_Bern16/pacbio/
-# touch files to keep them alive
-cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/pacbio/
-find . -exec touch {} \;
+/scratch/beegfs/monthly/SIB_long_read_workshop/pacbio_lambda_reads/
+# link them to my scratch
+cd /scratch/beegfs/monthly/<mydir>
+mkdir pb_reads
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/pacbio_lambda_reads/* ./pb_reads/
+
+# load module for read extraction
+module add UHTS/PacBio/pbh5tools/0.8.0;
 
 # get consensus reads (reads_of_insert.fastq)
 cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/wdir
 
-less reads_of_insert.fastq |  grep ccs$ | wc -l # how many reads in the input
+bsub -q priority bash5tools.py <file.bas.h5> --minReadScore 0.85 --minLength 2500 --outFilePrefix pb_reads_fitered --readType subreads --outType fastq
+
+less reads_of_insert.fastq |  grep @ | wc -l # how many reads in the input
 # note: 3068 in minION 
 # select same number from PacBio reads:
 awk "BEGIN {print 3068*4}"
-head -n 12272 reads_of_insert.fastq > sel_PacBio.fastq
+
+
 
 # some stats
 less sel_PacBio.fastq | grep -E '^[ACTGN]+$' | while read rawseq; do echo -n "$rawseq" | wc -c ; done > sel_PacBio_readlength.txt
