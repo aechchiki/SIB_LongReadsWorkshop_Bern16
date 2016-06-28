@@ -179,7 +179,7 @@ To access quality values, you can use `fastqc` known from Illumina data. Reporte
 
 ![help](img/help.png) If you are lost, you can get extracted MinION reads by executing
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_extraction_minion.sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_MinION.sh
 ```
 
 ### RSII
@@ -206,6 +206,7 @@ bsub -q priority bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extract
 ![Question](img/round-help-button.png)
 How many reads has was produced by the SMRT cell? [132269]
 
+
 ```sh
 wc -l <prefix_for_extracted_reads>.fastq   # reads in fastq = number of lines / 4
 ```
@@ -213,7 +214,7 @@ wc -l <prefix_for_extracted_reads>.fastq   # reads in fastq = number of lines / 
 ![help](img/help.png) If you are lost, you can get extracted RSII reads by executing
 
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_extraction_RSII.sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_RSII.sh
 ```
 
 ***
