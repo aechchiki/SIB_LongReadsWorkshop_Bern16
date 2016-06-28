@@ -190,7 +190,7 @@ How many reads has was produced by the SMRT cell? [132269]
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_read_extraction.sh
 ```
 
-## Mapping to a reference genome
+## 2. Mapping to a reference genome
 You will download the lambda phage reference genome and map the reads to it using the ```LAST``` aligner. To map to a reference genome, the reference sequence first needs to be indexed.
 
 ```sh
@@ -220,7 +220,7 @@ It is possible to specify to ```nanook align``` the alignment parameters to be u
 ### Bonus (or at home)
 You can try to align reads with other aligners. For example to use ```BWA-MEM```, you first need to load the corresponding module on vital-it (```module add UHTS/Aligner/bwa/0.7.13```), create the index of the reference sequence (```bwa index reference.fasta```). Then you can relaunch ```nanook align``` with the ```-aligner bwa``` option.
 
-## Statistics and QC report
+## 3. Statistics and QC report
 ![To do](img/wrench-and-hammer.png)
 Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse``` utility. A PDF file should be created in the ```latex_last_passfail/``` folder. If it's not the case, you can generate it yourself with the ```pdflatex file.tex``` command (press enter everytime the program prompt you with a question).
 
@@ -248,9 +248,15 @@ Take some time to read and understand the report. Here are a few questions that 
 
 * Have a look at the k-mer over and under-represention analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
-## Genome assembly
+## 4. Genome assembly
+
+Long reads genome assembly is just like established short-reads assembly based on graph theory, but strng graphs are used instead of De Brujin. Instead of kmer decomposition, the graph of reads (nodes) and their overlaps (edges) is constructed.
+
+There are two leading assemblers for long reads Canu and Falcon. Canu is a fork of celera with added modules for error correction and trimming of reads. Falcon is an assembler awared of ploidy developed from scratch for PacBio data.
 
 ### Tools
+
+We will use Canu and Miniasm for both MinION and PacBio assembly, then we check the assembly quality using the report provided by Quast. 
 
 **Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and PacBio data.
 
@@ -263,30 +269,32 @@ module add UHTS/Assembler/canu/1.3;
 ``` 
 
 
-### 1. MinION
+### MinION
 
-We will use Canu for MinION data assembly, then check the assembly quality using the report provided by Quast. 
+We assembdle lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substancially worse, quelity, so if we have enough 2D reads, we can use just them. The assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
 
-***TO DO Amina and Kamil***
-Using the 3,068 2D reads only. Small intro saying that this assembly should be trivial: 48kb genome and we have some reads of 20kb! We expect only one contig!
 
-TODO: why only 2D reads
+**Canu**
 
-Part 1: Assembly
+![To do](img/wrench-and-hammer.png) Chose apropriate parameters:
+
+```
+# parameters:	
+#				-p : use specified prefix to name canu output files
+#				-d : use specified prefix for output directories 
+#				-errorRate : (optional) specifies expected error of reads.
+#				-genomeSize : expected genome size
+#				-nanopore-raw : specifies ONT MinION data 
+#				-useGrid=false : disables automatic submission to cluster
+```
+
+and run the assembly in the directory with extracted MinION 2D reads.
 
 ```sh
-# move to directory with extracted MinION 2D reads
-cd <path/to/Lambda2D.fastq> 
-# load the assembler module
-module add UHTS/Assembler/canu/1.2
-# run the assembly
-canu -p Lambda2D_canu -d Lambda2D_canu genomeSize=48k -nanopore-raw Lambda2D.fastq -useGrid=false
-# parameters:	-p : use specified prefix to name canu output files
-#				-d : use specified prefix for output directories 
-#				genomeSize: expected genome size (from reference)
-#				-nanopore-raw : specifies ONT MinION data 
-#				-useGrid=false : disables automatic submission to LSF 
+bsub -n 4 -q priority 'canu -p lambda -d <name_of_folder_for_output> errorRate=<error_rate> genomeSize=<genome_size> -nanopore-raw <reads_name> -useGrid=false -maxThreads=4 &> canu_minion_lambda.log'
 ```
+
+
 Expected runtime: about 5 minutes. 
 
 The output is a directory containing several files. The most interesting ones are:
