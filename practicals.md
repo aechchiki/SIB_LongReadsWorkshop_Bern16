@@ -8,26 +8,29 @@ July 5th, 2016. University of Bern.
 https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longreads
 
 
-## Contributors: 
+## Contributors
+
 - Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB
 - Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB
 - Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB
 - Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB
 
 ## Introduction
+
 The aim of this practicals session is for you to get your hands on real long reads sequencing data generated from two different technologies:
-* Oxford Nanopore MinION
-* Pacific Biosciences RSII 
 
-The biological material sequenced using these two platforms is DNA from the lambda phage (http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (see for example https://peerj.com/articles/2055/). However, its genome is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
+- Oxford Nanopore [MinION](https://www.nanoporetech.com/products-services/minion-mki)
+- Pacific Biosciences [RSII](http://www.pacb.com/products-and-services/pacbio-systems/rsii/)
 
-You will go through different steps, which include the extraction of reads from their native encoding formats (HDF5 formats, see http://en.wikipedia.org/wiki/Hierarchical_Data_Format), their quality control, their mapping to a reference genome, and a *de-novo* genome assembly.
+The biological material sequenced using these two platforms is DNA from the [lambda phage](http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (check [this](https://peerj.com/articles/2055/) publication for example ). However, its genome is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
 
-The MinION library preparation protocol starts by DNA fragmentation, then the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: a Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. Here is Figure 1A of a paper (http://www.genetics.org/content/202/1/37) illustrating well the protocol: 
+You will go through different steps, which include the extraction of reads from their native encoding formats ([HDF5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format)), their quality control, their mapping to a reference genome, and a *de-novo* genome assembly.
+
+The MinION library preparation protocol starts by DNA fragmentation, then the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. An illustration of the protocol is provided in this [figure](http://www.genetics.org/content/202/1/37):
 
 ![protocol](img/protocol.jpg)
 
-In the MinION experiment you are going to analyze, the lambda phage DNA was fragmented using sonication (Covaris) to yield ~8kb-long fragments. One microgram of fragmented DNA material was then used for library preparation, but protocols exist for smaller amounts of starting material. 
+In the MinION experiment you are going to analyze, the lambda phage DNA was fragmented using sonication (Covaris) to yield ~8kb-long fragments. One microgram of fragmented DNA material was then used for library preparation. Other protocols exist for smaller amounts of starting material. 
 
 The sequencing run produced a single ```.fast5``` file per pore. All files were then uploaded to the cloud for basecalling. The base-called files were downloaded back to vital-it. They are also in the ```.fast5``` format, but there is one file per read.
 
@@ -37,44 +40,41 @@ Details of protocol: https://community.nanoporetech.com/protocols/experiment-com
 
 ***
 
-## How to connect to the Vital-it cluster?
+## ⚒ How to connect to the Vital-IT cluster?
 
-By now, you should have received a username and password to access the high performance computing cluster of the SIB (Vital-it).
+By now, you should have received a username and password to access the high performance computing cluster of the SIB (Vital-IT).
 
-Note 1: Even if you have access to another cluster, you will not be able to access the data which is stored on Vital-it so all participants should connect to the latter.
+Note 1: Even if you have access to another cluster, you will not be able to access the data which is stored on Vital-IT so all participants should connect to the latter.
 
-Note 2: Obviously, you can use your own Vital-it account if you have one...
+Note 2: Obviously, you can use your own Vital-IT account if you have one.
 
 In order to connect to the cluster and set up your working directory follow the next steps:
 
-### For Unix/Mac users
+### For Linux/OSX users
 
-* type:
+* In a terminal, type:
 
-```sh
-ssh <username>@prd.vital-it.ch
-```
+```ssh <username>@prd.vital-it.ch```
 
-* you will prompt for password: 
+* You will be prompted to input your user password: 
 
-```sh
-<username>@prd.vital-it.ch's password:
-```
+```<username>@prd.vital-it.ch's password:```
 
-type in your password (you will not see what you are typing) and press enter.
+type in your password (you will not see what you are typing) and press Enter.
 
-* You are in (jump to point Setting up your working directory)
+* You are in! Jump to: "Setting up your working directory".
 
 ### For Windows users
-You should have a ssh client e.g. PuTTY.
 
-* if you already have it, I assume you know how to use it (Connect to Vital-it and go to point 3)
+You should first have a ssh client installed e.g. PuTTY.
 
-* if you don't have an ssh client, follow the following link steps and when done proceed to point 3. https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf
+* If you already have it, we assume you know how to use it: connect to Vital-it and jump to point 3.
+
+* If you don't have an ssh client, follow the following link steps. When done, proceed to point 3. https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf
 
 ### Setting up your working directory
 
-On Vital-it, it is highly recommended yet mandatory to read and write in the ```/scratch``` directory:
+On Vital-IT, it is highly recommended yet mandatory to read and write in the ```/scratch``` directory:
 
 * move to `/scratch`: 
     
@@ -88,9 +88,9 @@ cd /scratch/beegfs/weekly/
 mkdir <username> ; cd <username>
 ```
 
-* You will always be working from this directory. Before launching commands please be sure that you're located in the right directory by typing:
-    ```pwd```, expected output: ```/scratch/beegfs/weekly/<username>```
-
+* You will always be working from this directory. Before launching commands please be sure that you are located in the right directory by typing:
+    ```pwd```
+    ( Expected output: ```/scratch/beegfs/weekly/<username>```)
 ***
 
 ## 1. Read extraction
