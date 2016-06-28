@@ -186,8 +186,9 @@ How many reads has was produced by the SMRT cell? [132269]
 
 ![help](img/help.png) If you are lost and if you want to catch up on others, just execute
 
-```
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_read_extraction.sh
+```sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_MinION.sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_RSII.sh
 ```
 
 ## 2. Mapping to a reference genome
