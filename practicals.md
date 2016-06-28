@@ -170,18 +170,11 @@ You will need to convert the MinION raw reads from their ```.fast5``` to a more 
 bsub -q priority "poretools fastq --type 2D lambda_minion/fast5/*.fast5 >  lambda_minion/MinION_Lambda2D.fastq"
 ```
 
-### Bonus (or at home)
-The ```.fasta``` format is nice and simple, but does not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
-
-```sh
-nanook extract -fastq -s lambda
-```
-
 ![Question](img/round-help-button.png)
 Do the quality scores seem to be improved in 2D reads? 
 
 ![Tip](img/elemental-tip.png)
-To access quality values, you can use `fastqc` known from Illumina data. Reported stats are correct, just keep in mind, that warning flags in the report are for assembly by short reads and therefore not very informative.
+To access quality values, you can use `fastqc` software, as for short-reads data. Reported stats are correct, just keep in mind that warning flags in the report are for assembly by short reads and therefore not very informative.
 
 ![help](img/help.png) If you are lost, you can get extracted MinION reads by executing
 ```sh
