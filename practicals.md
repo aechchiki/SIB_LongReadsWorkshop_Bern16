@@ -90,7 +90,10 @@ mkdir <username> ; cd <username>
 
 * You will always be working from this directory. Before launching commands please be sure that you are located in the right directory by typing:
     ```pwd```
-    ( Expected output: ```/scratch/beegfs/weekly/<username>```)
+
+Expected output: ```/scratch/beegfs/weekly/<username>```)
+
+    
 ***
 
 ## 1. Read extraction
