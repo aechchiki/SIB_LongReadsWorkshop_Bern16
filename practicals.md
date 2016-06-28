@@ -113,10 +113,10 @@ RSII system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The thre
 
 ### Tools
 
-**poretools** is a toolkit to analyze MinION data, including the extraction of read sequences from native ```.fast5``` files. Source code is available on [GitHub](https://github.com/arq5x/poretools) and software usage is detailed in [documentation](http://poretools.readthedocs.io/en/latest/). **poretools** is available on Vital-IT: 
+**NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from ```.fast5``` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK). **NanoOK** is available on Vital-IT:
 
 ```sh
-module add UHTS/Analysis/poretools/0.5.1
+module add UHTS/Analysis/NanoOK/0.72
 ```
 
 **pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). **pbh5tools** is available on Vital-IT: 
@@ -164,10 +164,10 @@ h5stat file.fast5
 ```
 
 ![To do](img/wrench-and-hammer.png)
-You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fastq```. This can be done with the ```poretools fastq``` utility, and takes some seconds.
+You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fasta```. This can be done with the ```nanook extract``` utility, and takes around 10 minutes.
 
 ```sh
-bsub -q priority "poretools fastq --type 2D lambda_minion/fast5/*.fast5 >  lambda_minion/MinION_Lambda2D.fastq"
+bsub -q priority "nanook extract -fasta -s lambda_minion"
 ```
 
 ![Question](img/round-help-button.png)
