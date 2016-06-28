@@ -17,10 +17,11 @@ cd /scratch/beegfs/monthly/aechchik/SIB_Bern16/minion/wdir
 
 bsub -q priority bash5tools.py <file.bas.h5> --minReadScore 0.85 --minLength 2500 --outFilePrefix pb_reads_fitered --readType subreads --outType fastq
 
-less reads_of_insert.fastq |  grep @ | wc -l # how many reads in the input
+cat reads_of_insert.fastq |  grep @ | wc -l # how many reads in the input
 # note: 3068 in minION 
 # select same number from PacBio reads:
-awk "BEGIN {print 3068*4}"
+
+head -12272 pacbio_reads.fastq > sel_PacBio.fastq
 
 
 
@@ -71,6 +72,13 @@ grep ^COV Lambda.last.stats > Lambda.last.coverage
 
 
 ### assembly
+
+module add UHTS/Analysis/minimap/0.2.r124.dirty;
+module add UHTS/Analysis/miniasm/0.2.r137.dirty;
+
+#minimap -Sw5 -L100 -m0 -t8 RSII_selection.fq RSII_selection.fq | gzip -1 > Lambda_reads.paf.gz
+#miniasm -f RSII_selection.fq Lambda_reads.paf.gz > Lambda_contigs.gfa
+#awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
 
 # overlap
 /home/aechchik/bin/minimap/minimap -Sw5 -L100 -m0 -t8 sel_PacBio.fastq sel_PacBio.fastq | gzip -1 > Lambda_reads.paf.gz

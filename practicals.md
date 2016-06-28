@@ -264,38 +264,40 @@ We will use Canu and Miniasm for both MinION and PacBio assembly, then we check 
 * GitHub page: https://github.com/marbl/canu
 * Canu manual: http://canu.readthedocs.io/en/stable/
 
-```
+```sh
 module add UHTS/Assembler/canu/1.3;
 ``` 
 
+**Miniasm** is lightwaited assembler. It very fast, but for a cost of simplicity and low parametrization. It can used for a first proxy of the data content, but for the final assembly, another assembler should be considered.
+
+```sh
+module add UHTS/Analysis/minimap/0.2.r124.dirty;
+module add UHTS/Analysis/miniasm/0.2.r137.dirty;
+```
 
 ### MinION
 
 We assembdle lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substancially worse, quelity, so if we have enough 2D reads, we can use just them. The assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
-
 
 **Canu**
 
 ![To do](img/wrench-and-hammer.png) Chose apropriate parameters:
 
 ```
-# parameters:	
-#				-p : use specified prefix to name canu output files
-#				-d : use specified prefix for output directories 
-#				-errorRate : (optional) specifies expected error of reads.
-#				-genomeSize : expected genome size
-#				-nanopore-raw : specifies ONT MinION data 
-#				-useGrid=false : disables automatic submission to cluster
+parameters:	
+				-p : use specified prefix to name canu output files
+				-d : use specified prefix for output directories 
+				-errorRate : (optional) specifies expected error of reads.
+				-genomeSize : expected genome size
+				-nanopore-raw : specifies ONT MinION data 
+				-useGrid=false : disables automatic submission to cluster
 ```
 
-and run the assembly in the directory with extracted MinION 2D reads.
+![To do](img/wrench-and-hammer.png) and run the assembly in the directory with extracted MinION 2D reads.
 
 ```sh
 bsub -n 4 -q priority 'canu -p lambda -d <name_of_folder_for_output> errorRate=<error_rate> genomeSize=<genome_size> -nanopore-raw <reads_name> -useGrid=false -maxThreads=4 &> canu_minion_lambda.log'
 ```
-
-
-Expected runtime: about 5 minutes. 
 
 The output is a directory containing several files. The most interesting ones are:
 - *.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
@@ -304,59 +306,47 @@ The output is a directory containing several files. The most interesting ones ar
 - *.gfa : file containing the assembly graph by Canu
 - *.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
 
-Part 2: Assembly quality
+![Question](img/round-help-button.png) How manycontigs were produced? [1]
 
-We will use the information in *.contigs.fasta to generate the assembly report.
-
-```sh
-# load the quality assessment module 
-module add UHTS/Quality_control/quast/4.1
-# generate the report 
-quast.py -R <path/to/reference_genome> *.contigs.fasta
-```
-
-The output is a directory, typically ```quast_results/<date_of_launch>``` containing several files. The most interesting for us is the report in pdf format. We can copy it to the local machine using ```scp```. 
-
-TODO: interesting questions about the report?
-
-
-### 2. PacBio
-
-***TO DO Amina and Kamil***
-Use only proof-read "reads of insert" (previously called "CCS" reads). 
-Might be a good idea to subsample to ~3,000 reads for a fair comparison of the technologies (and it will be faster)
-
-Part 0: Subset reads of insert
-
-TODO: why to subset? (make it comparable)
+![To do](img/wrench-and-hammer.png) Compute overlaps of reads using `minimap`
 
 ```sh
-# move to directory with PacBio data
-cd <path/to/PacBio_data>
-# check how many reads in the MinION 2D dataset
-less <path/to/Lambda2D.fastq> | grep .fast5$ | wc -l  #answer: 3068
-# select the same number of reads from PacBio data 
-awk "BEGIN {print 3068*4}" # print how many rows to process (! fastq format: 1 seqeunce = 4 lines)
-# extract subset of data from original Reads of Insert file
-head -n 12272 reads_of_insert.fastq > LambdaRI.fastq
+bsub -q priority -n 4 'minimap -Sw5 -L100 -m0 -t4 <reads.fq> <reads.fq> | gzip -1 > <overlaps.paf.gz>'
 ```
 
-Part 1: Assembly
+![To do](img/wrench-and-hammer.png) Perform an assemly using `miniasm`.
 
 ```sh
-# move to directory with extracted PacBio "Reads of Insert"
-cd <path/to/LambdaRI.fastq> 
-# load the assembler module
-module add UHTS/Assembler/canu/1.2
-# run the assembly
-canu -p LambdaRI_canu -d LambdaRI_canu genomeSize=48k -pacbio-raw LambdaRI.fastq -useGrid=false
-# parameters:	-p : use specified prefix to name canu output files
-#				-d : use specified prefix for output directories 
-#				genomeSize: expected genome size (from reference)
-#				-pacbio-raw : specifies ONT MinION data 
-#				-useGrid=false : disables automatic submission to LSF 
+bsub -q priority 'miniasm -f <reads.fq> <overlaps.paf.gz> > Lambda_contigs.gfa'
 ```
-Expected runtime: about 5 minutes. 
+
+![To do](img/wrench-and-hammer.png) Convert `.gfa` to `.fasta`.
+
+```sh
+awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
+```
+
+![Question](img/round-help-button.png) Is it different the assembly computed by `Canu` and `Miniasm`? [not much]
+
+### RSII
+
+One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
+
+![To do](img/wrench-and-hammer.png) Go to directory with extracted RSII reads and take a subset of the first 3,000 reads.
+
+```sh
+head -12000 pacbio_reads.fastq > RSII_reads_subset.fastq
+```
+
+The assembly is now analogical to the assembly of MinION data
+
+![To do](img/wrench-and-hammer.png) Modify in the command of `Canu` the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
+
+
+![To do](img/wrench-and-hammer.png) Perform assembly of RSII data using miniasm as well.
+
+![Question](img/round-help-button.png) What is the length
+
 
 ## Quality of assembly
 
