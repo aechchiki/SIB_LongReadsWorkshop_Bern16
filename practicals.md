@@ -40,7 +40,7 @@ Details of protocol: https://community.nanoporetech.com/protocols/experiment-com
 
 ***
 
-## ⚒ How to connect to the Vital-IT cluster?
+## How to connect to the Vital-IT cluster?
 
 By now, you should have received a username and password to access the high performance computing cluster of the SIB (Vital-IT).
 
@@ -108,19 +108,24 @@ MinION basecaller produces one file per read. In the file there is a time series
 
 **bas.h5 & bax.h5**
 
-RS2 system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio announced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RSII will be still in `.h5` formats we are going to work with.
+RSII system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio announced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RSII will be still in `.h5` formats we are going to work with.
 
 
 ### Tools
 
-**NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from ```.fast5``` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on its [GitHub page](http://github.com/TGAC/NanoOK) and all details in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
+**poretools** is a toolkit to analyze MinION data, including the extraction of read sequences from native ```.fast5``` files. Source code is available on [GitHub](https://github.com/arq5x/poretools) and software usage is detailed in [documentation](http://poretools.readthedocs.io/en/latest/). **poretools** is available on Vital-IT: 
 
 ```sh
-module add UHTS/Analysis/NanoOK/0.72;
+module add UHTS/Analysis/poretools/0.5.1
 ```
 
-**pbh5tools**
-are a python scripts for extracting `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. Scripts allow filtering based on error rate, read length and read type. Read types of SMRT cell are
+**pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). **pbh5tools** is available on Vital-IT: 
+
+```sh
+module add UHTS/PacBio/pbh5tools/0.8.0;
+```
+
+Read types of SMRT cell are: 
 
 <!--
 syntax of scripts to tools?
@@ -159,15 +164,11 @@ h5stat file.fast5
 ```
 
 ![To do](img/wrench-and-hammer.png)
-You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fasta```. This can be done with the ```nanook extract``` utility, and takes around 10 minutes.
+You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fastq```. This can be done with the ```poretools fastq``` utility, and takes some seconds.
 
 ```sh
-bsub -q priority nanook extract -fasta -s lambda_minion
+bsub -q priority "poretools fastq --type 2D lambda_minion/fast5/*.fast5 >  lambda_minion/MinION_Lambda2D.fastq"
 ```
-
-![Question](img/round-help-button.png)
-What folders were created by ```nanoOK```? What do the ```2D```, ```Template``` and ```Complement``` folders represent?
-
 
 ### Bonus (or at home)
 The ```.fasta``` format is nice and simple, but does not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
