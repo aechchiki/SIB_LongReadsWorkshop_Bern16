@@ -1,3 +1,6 @@
+---
+output: html_document
+---
 # SIB workshop "Bioinformatics of long read sequencing" hands-on
 
 July 5th, 2016. University of Bern. 
@@ -32,7 +35,9 @@ The sequencing run produced a single ```.fast5``` file per pore. All files were 
 Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
 -->
 
-## ![To do](img/wrench-and-hammer.png)How to connect to the Vital-it cluster?
+***
+
+## How to connect to the Vital-it cluster?
 
 By now, you should have received a username and password to access the high performance computing cluster of the SIB (Vital-it).
 
@@ -42,43 +47,55 @@ Note 2: Obviously, you can use your own Vital-it account if you have one...
 
 In order to connect to the cluster and set up your working directory follow the next steps:
 
-### 1. For Unix/Mac users
+### For Unix/Mac users
 
 * type:
-```ssh <username>@prd.vital-it.ch```
+
+```sh
+ssh <username>@prd.vital-it.ch
+```
 
 * you will prompt for password: 
-```<username>@prd.vital-it.ch's password:```
+
+```sh
+<username>@prd.vital-it.ch's password:
+```
 
 type in your password (you will not see what you are typing) and press enter.
 
-* You are in (jump to point 3-)
+* You are in (jump to point Setting up your working directory)
 
-### 2. For Windows users
+### For Windows users
 You should have a ssh client e.g. PuTTY.
 
 * if you already have it, I assume you know how to use it (Connect to Vital-it and go to point 3)
 
 * if you don't have an ssh client, follow the following link steps and when done proceed to point 3. https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf
 
-### 3. Setting up your working directory:
+### Setting up your working directory
 
-On Vital-it, it is highly recommended yet mandatory to read and write in the ```/scratch```directory:
+On Vital-it, it is highly recommended yet mandatory to read and write in the ```/scratch``` directory:
 
-* move to ```/scratch```: 
+* move to `/scratch`: 
     
-    ```cd /scratch/beegfs/weekly/```
+```sh
+cd /scratch/beegfs/weekly/
+```
 
 * create your own directory:
     
-    ```mkdir <username> ; cd <username>```
+```sh
+mkdir <username> ; cd <username>
+```
 
-* You will always be working from this directory. Before launching commands please be sure that youre located in the right directory by typing:
+* You will always be working from this directory. Before launching commands please be sure that you're located in the right directory by typing:
     ```pwd```, expected output: ```/scratch/beegfs/weekly/<username>```
+
+***
 
 ## 1. Read extraction
 
-The output of MinION and PacBio RSII is stored in Hierarchical Data Format, what is basically an achive format (like `.zip` or `.tar`), but with very quick access to its content (You can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). In those files are more details about reads and basecalling. What, we need is just a simple `.fastq` for downstream analysis.
+The output of MinION and PacBio RSII is stored in Hierarchical Data Format, what is basically an archive format (like `.zip` or `.tar`), but with very quick access to its content (You can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). In those files are more details about reads and basecalling. What, we need is just a simple `.fastq` for downstream analysis.
 
 **fast5**
 
@@ -86,7 +103,7 @@ MinION basecaller produces one file per read. In the file there is a time series
 
 **bas.h5 & bax.h5**
 
-RS2 system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio anounced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RSII will be still in `.h5` formats we are going to work with.
+RS2 system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio announced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RSII will be still in `.h5` formats we are going to work with.
 
 
 ### Tools
@@ -115,14 +132,14 @@ text or picture??
 ### MinION
 
 ![To do](img/wrench-and-hammer.png)
-First, create a working directory for both PacBio and MinION raw reads and create links to the raw sequencing files.
+First, create a working directory for MinION raw reads and create links to the raw sequencing files.
 
 ```sh
 mkdir -p lambda_minion/fast5/
 ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/minion_lambda_reads/*.fast5 lambda_minion/fast5/
 ```
 ![Question](img/round-help-button.png)
-Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
+Can you guess what each file corresponds to? How many reads has this sequencing experiment produced? [TO ADD]
 
 ```sh
 ls lambda_minion/fast5/ | wc -l
@@ -150,7 +167,7 @@ What folders were created by ```nanoOK```? What do the ```2D```, ```Template``` 
 ### Bonus (or at home)
 The ```.fasta``` format is nice and simple, but does not include any information on the quality of the sequences produced. The ```.fastq``` format however has this information. Launch ```nanook extract``` with the option to extract to ```.fastq``` format (you don't need to let ```nanook extract``` finish the extraction of all reads, a few dozens should be enough).  Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
 
-```
+```sh
 nanook extract -fastq -s lambda
 ```
 
@@ -158,24 +175,29 @@ nanook extract -fastq -s lambda
 Do the quality scores seem to be improved in 2D reads? 
 
 ![Tip](img/elemental-tip.png)
-To access quality values, you can use `fastqc` known from Illumina data. Reported stats are correct, just keep in mind, that waring flags in the report are for assemly by short reads and therefore not very informative.
+To access quality values, you can use `fastqc` known from Illumina data. Reported stats are correct, just keep in mind, that warning flags in the report are for assembly by short reads and therefore not very informative.
 
-### PacBio
-```{bash}
+![help](img/help.png) If you are lost, you can get extracted MinION reads by executing
+```sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_extraction_minion.sh
+```
+
+### RSII
+```sh
 module add UHTS/PacBio/pbh5tools/0.8.0;
 ```
 
-![To do](img/wrench-and-hammer.png) Extract also PacBio reads using 
+![To do](img/wrench-and-hammer.png) Extract also RSII reads using 
 
 ```sh
-mkdir -p lambda_pacbio/raw_reads/
-ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/pacbio_lambda_reads/*.h5 lambda_pacbio/raw_reads/
+mkdir -p lambda_RSII/raw_reads/
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/RSII_lambda_reads/*.h5 lambda_RSII/raw_reads/
 ```
 
 ![Question](img/round-help-button.png)
 How reads of many SMRT cells we have? [1]
 
-![To do](img/wrench-and-hammer.png) Extract PacBio reads using `bash5tools.py` from `pbh5tools`.
+![To do](img/wrench-and-hammer.png) Extract RSII reads using `bash5tools.py` from `pbh5tools`.
 
 ```sh
 bsub -q priority bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq
@@ -184,14 +206,200 @@ bsub -q priority bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extract
 ![Question](img/round-help-button.png)
 How many reads has was produced by the SMRT cell? [132269]
 
-![help](img/help.png) If you are lost and if you want to catch up on others, just execute
-
-```
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_read_extraction.sh
+```sh
+wc -l <prefix_for_extracted_reads>.fastq   # reads in fastq = number of lines / 4
 ```
 
-## 2. Mapping to a reference genome
-You will download the lambda phage reference genome and map the reads to it using the ```LAST``` aligner. To map to a reference genome, the reference sequence first needs to be indexed.
+![help](img/help.png) If you are lost, you can get extracted RSII reads by executing
+
+```sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/1_extraction_RSII.sh
+```
+
+***
+
+## 2. Genome assembly
+
+Long reads genome assembly is just like established short-reads assembly based on graph theory, but string graphs are used instead of De Brujin. Instead of kmer decomposition, the graph of reads (nodes) and their overlaps (edges) is constructed.
+
+There are two leading assemblers for long reads Canu and Falcon. Canu is a fork of Celera with added modules for error correction and trimming of reads. Falcon is an assembler aware of ploidy developed from scratch for PacBio data.
+
+### Tools
+
+We will use Canu and Miniasm for both MinION and RSII assembly, then we check the assembly quality using the report provided by Quast. 
+
+**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and RSII data.
+
+* Link to the paper: http://www.nature.com/nbt/journal/v33/n6/abs/nbt.3238.html
+* GitHub page: https://github.com/marbl/canu
+* Canu manual: http://canu.readthedocs.io/en/stable/
+
+**Miniasm** is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used for a first proxy of the data content, but for the final assembly, another assembler should be considered. The first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
+
+### MinION
+
+We assemble lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substantially worse, quality, so if we have enough 2D reads, we can use just them. The assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
+
+**Canu**
+
+```sh
+module add UHTS/Assembler/canu/1.3;
+``` 
+
+![To do](img/wrench-and-hammer.png) Chose appropriate parameters:
+
+```
+parameters:	
+				-p : use specified prefix to name canu output files
+				-d : use specified prefix for output directories 
+				-errorRate : (optional) specifies expected error of reads.
+				-genomeSize : expected genome size
+				-nanopore-raw : specifies ONT MinION data 
+				-useGrid=false : disables automatic submission to cluster
+```
+
+![To do](img/wrench-and-hammer.png) and run the assembly in the directory with extracted MinION 2D reads.
+
+```sh
+bsub -n 4 -q priority 'canu -p lambda -d <name_of_folder_for_output> errorRate=<error_rate> genomeSize=<genome_size> -nanopore-raw <reads_name> -useGrid=false -maxThreads=4 &> canu_minion_lambda.log'
+```
+
+The output is a directory containing several files. The most interesting ones are:
+- *.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
+- *.trimmedReads.fastq : file containing the sequences after correction and final trimming
+- *.layout : file containing informations about read inclusion in the final assembly
+- *.gfa : file containing the assembly graph by Canu
+- *.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
+
+![Question](img/round-help-button.png) How many contigs were produced? [1]
+
+**Miniasm**
+
+```sh
+module add UHTS/Analysis/minimap/0.2.r124.dirty;
+module add UHTS/Analysis/miniasm/0.2.r137.dirty;
+```
+
+![To do](img/wrench-and-hammer.png) Compute overlaps of reads using `minimap`
+
+```sh
+bsub -q priority -n 4 'minimap -Sw5 -L100 -m0 -t4 <reads.fq> <reads.fq> | gzip -1 > <overlaps.paf.gz>'
+```
+
+![To do](img/wrench-and-hammer.png) Perform an assembly using `miniasm`.
+
+```sh
+bsub -q priority 'miniasm -f <reads.fq> <overlaps.paf.gz> > Lambda_contigs.gfa'
+```
+
+![To do](img/wrench-and-hammer.png) Convert `.gfa` to `.fasta`.
+
+```sh
+awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
+```
+
+![Question](img/round-help-button.png) How is it different, the assembly computed by `Canu` and `Miniasm`? [not much]
+
+### RSII
+
+One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
+
+![To do](img/wrench-and-hammer.png) Go to directory with extracted RSII reads and take a subset of the first 3,000 reads.
+
+```sh
+head -12000 RSII_reads.fastq > RSII_reads_subset.fastq
+```
+
+The assembly is now analogical to the assembly of MinION data
+
+![To do](img/wrench-and-hammer.png) Modify in the command of `Canu` the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
+
+
+![To do](img/wrench-and-hammer.png) Perform assembly of RSII data using miniasm as well.
+
+![Question](img/round-help-button.png) What is are the lengths of all four assemblies? Is there anything weird going on? [yes, RSII reads are not assembled well.]
+
+
+![help](img/help.png) If you are lost, you can get both assemblies of MinION and RSII reads by executing
+```sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_assembly.sh
+```
+
+***
+
+## 3. Quality of assembly
+
+### Tools
+
+**Quast** is a quality assessment tool for genome assemblies. Running Quast on an assembly provides a detailed report about the statistics of the assembly, in pdf format.
+
+* Link to the paper: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/
+* GitHub page: https://github.com/ablab/quast
+* Quast manual: http://quast.bioinf.spbau.ru/manual
+
+The `Quast` module is installed on vital-IT. You can access the software by loading the module: `module add UHTS/Quality_control/quast/4.1`. 
+
+### Usage?
+
+We will use the information in *.contigs.fasta to generate the assembly report.
+
+```sh
+# load the quality assessment module 
+module add UHTS/Quality_control/quast/4.1
+# generate the report 
+quast.py -R <path/to/reference_genome> *.contigs.fasta
+```
+
+The output is a directory, typically `quast_results/<date_of_launch>` containing several files. The most interesting for us is the report in pdf format. We can copy it to the local machine using `scp`. 
+
+TODO: interesting questions about the report?
+
+
+TODO: questions on comparison of the assemblies 
+
+
+***TO DO: Emmanuel has done a nanook analysis on these reads. transfer the PDF to your laptop using `scp`. Couldn't do it because permissions not set up correctly (email sent to Emmanuel).***
+
+***TO DO: Emmanuel told me the DNA fragments for PacBio were 10kb long. Is that made through sonication or size-selection?***
+
+![Question](img/round-help-button.png)
+Have a look at the `nanoOK` report for these reads. How does it compare to the report made on MinION reads?
+
+
+<!--
+TO DOs
+* check this paper https://dx.doi.org/10.7554/eLife.14258
+* check the porecamp material (analysis part): http://porecamp.github.io/timetable.html
+* Check Pradervand talk: http://edu.isb-sib.ch/pluginfile.php/3390/course/section/1574/Pradervand_Sequencing_CUSO2015.pdf
+* Will these modules be needed?
+```sh
+module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
+module add UHTS/PacBio/blasr/20140829;
+module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
+module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
+```
+* Idea: make them download maf files and reference genome, and open in IGV... Or is it possible to generate a picture on vital-it from IGV?
+
+![Question](img/round-help-button.png)
+![Tip](img/elemental-tip.png)
+![To do](img/wrench-and-hammer.png)
+![Warning](img/warning.png)
+-->
+
+![help](img/help.png) If you are lost, you can get all quality stats of all assemblies by executing
+```sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/3_assembly_quality.sh
+```
+
+***
+
+## 4. Mapping to a assembled genome
+
+### Tools
+
+You will download the lambda phage reference genome and map the reads to it using the `LAST` aligner. To map to a reference genome, the reference sequence first needs to be indexed.
+
+### MinION
 
 ```sh
 mkdir -p lambda_minion/reference/
@@ -202,10 +410,10 @@ lastdb -Q 0 lambda_ref_genome lambda_ref_genome.fa
 cd ../../
 ```
 ![Tip](img/elemental-tip.png)
-The size of the indexed sequences can be visualized in the ```.sizes``` file.
+The size of the indexed sequences can be visualized in the `.sizes` file.
 
 ![To do](img/wrench-and-hammer.png)
-Now launch the alignment with ```LAST``` (default aligner) using the ```nanook align``` utility.
+Now launch the alignment with `LAST` (default aligner) using the `nanook align` utility.
 
 ```sh
 nanook align -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
@@ -215,14 +423,26 @@ nanook align -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
 What directories have been created? What do they contain? Look at one randomly chosen alignment file. What is striking?
 
 ![Tip](img/elemental-tip.png)
-It is possible to specify to ```nanook align``` the alignment parameters to be used with ```LAST```, with the ```-alignerparams``` option. By default the parameters are ```-s 2 -T 0 -Q 0 -a 1```.
+It is possible to specify to `nanook align` the alignment parameters to be used with `LAST`, with the `-alignerparams` option. By default the parameters are `-s 2 -T 0 -Q 0 -a 1`.
 
 ### Bonus (or at home)
-You can try to align reads with other aligners. For example to use ```BWA-MEM```, you first need to load the corresponding module on vital-it (```module add UHTS/Aligner/bwa/0.7.13```), create the index of the reference sequence (```bwa index reference.fasta```). Then you can relaunch ```nanook align``` with the ```-aligner bwa``` option.
+You can try to align reads with other aligners. For example to use `BWA-MEM`, you first need to load the corresponding module on vital-it (`module add UHTS/Aligner/bwa/0.7.13`), create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
 
-## 3. Statistics and QC report
+![help](img/help.png) If you are lost, you can perform mapping of RSII reads by executing
+```sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
+```
+
+### RSII
+
+![help](img/help.png) If you are lost, you can perform mapping of RSII reads by executing
+```sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
+```
+
+### Statistics and QC report
 ![To do](img/wrench-and-hammer.png)
-Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse``` utility. A PDF file should be created in the ```latex_last_passfail/``` folder. If it's not the case, you can generate it yourself with the ```pdflatex file.tex``` command (press enter everytime the program prompt you with a question).
+Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse``` utility. A PDF file should be created in the ```latex_last_passfail/``` folder. If it's not the case, you can generate it yourself with the ```pdflatex file.tex``` command (press enter every time the program prompt you with a question).
 
 <!--
 nanook analyse -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
@@ -246,164 +466,11 @@ Take some time to read and understand the report. Here are a few questions that 
 
 *TO DO: tell them to have a look at alignments in this region to see the mutation?*
 
-* Have a look at the k-mer over and under-represention analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
-
-## 4. Genome assembly
-
-Long reads genome assembly is just like established short-reads assembly based on graph theory, but strng graphs are used instead of De Brujin. Instead of kmer decomposition, the graph of reads (nodes) and their overlaps (edges) is constructed.
-
-There are two leading assemblers for long reads Canu and Falcon. Canu is a fork of celera with added modules for error correction and trimming of reads. Falcon is an assembler awared of ploidy developed from scratch for PacBio data.
-
-### Tools
-
-We will use Canu and Miniasm for both MinION and PacBio assembly, then we check the assembly quality using the report provided by Quast. 
-
-**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and PacBio data.
-
-* Link to the paper: http://www.nature.com/nbt/journal/v33/n6/abs/nbt.3238.html
-* GitHub page: https://github.com/marbl/canu
-* Canu manual: http://canu.readthedocs.io/en/stable/
-
-```sh
-module add UHTS/Assembler/canu/1.3;
-``` 
-
-**Miniasm** is lightwaited assembler. It very fast, but for a cost of simplicity and low parametrization. It can used for a first proxy of the data content, but for the final assembly, another assembler should be considered.
-
-```sh
-module add UHTS/Analysis/minimap/0.2.r124.dirty;
-module add UHTS/Analysis/miniasm/0.2.r137.dirty;
-```
-
-### MinION
-
-We assembdle lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substancially worse, quelity, so if we have enough 2D reads, we can use just them. The assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
-
-**Canu**
-
-![To do](img/wrench-and-hammer.png) Chose apropriate parameters:
-
-```
-parameters:	
-				-p : use specified prefix to name canu output files
-				-d : use specified prefix for output directories 
-				-errorRate : (optional) specifies expected error of reads.
-				-genomeSize : expected genome size
-				-nanopore-raw : specifies ONT MinION data 
-				-useGrid=false : disables automatic submission to cluster
-```
-
-![To do](img/wrench-and-hammer.png) and run the assembly in the directory with extracted MinION 2D reads.
-
-```sh
-bsub -n 4 -q priority 'canu -p lambda -d <name_of_folder_for_output> errorRate=<error_rate> genomeSize=<genome_size> -nanopore-raw <reads_name> -useGrid=false -maxThreads=4 &> canu_minion_lambda.log'
-```
-
-The output is a directory containing several files. The most interesting ones are:
-- *.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
-- *.trimmedReads.fastq : file containing the sequences after correction and final trimming
-- *.layout : file containing informations abount read inclusion in the final assembly
-- *.gfa : file containing the assembly graph by Canu
-- *.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
-
-![Question](img/round-help-button.png) How manycontigs were produced? [1]
-
-![To do](img/wrench-and-hammer.png) Compute overlaps of reads using `minimap`
-
-```sh
-bsub -q priority -n 4 'minimap -Sw5 -L100 -m0 -t4 <reads.fq> <reads.fq> | gzip -1 > <overlaps.paf.gz>'
-```
-
-![To do](img/wrench-and-hammer.png) Perform an assemly using `miniasm`.
-
-```sh
-bsub -q priority 'miniasm -f <reads.fq> <overlaps.paf.gz> > Lambda_contigs.gfa'
-```
-
-![To do](img/wrench-and-hammer.png) Convert `.gfa` to `.fasta`.
-
-```sh
-awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
-```
-
-![Question](img/round-help-button.png) Is it different the assembly computed by `Canu` and `Miniasm`? [not much]
+* Have a look at the k-mer over and under-representation analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
 ### RSII
 
-One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
-
-![To do](img/wrench-and-hammer.png) Go to directory with extracted RSII reads and take a subset of the first 3,000 reads.
-
+![help](img/help.png) If you are lost, you can perform a quality control report of mapping by executing
 ```sh
-head -12000 pacbio_reads.fastq > RSII_reads_subset.fastq
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_mapping_qc_report.sh
 ```
-
-The assembly is now analogical to the assembly of MinION data
-
-![To do](img/wrench-and-hammer.png) Modify in the command of `Canu` the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
-
-
-![To do](img/wrench-and-hammer.png) Perform assembly of RSII data using miniasm as well.
-
-![Question](img/round-help-button.png) What is the length
-
-
-## Quality of assembly
-
-### Tools
-
-**Quast** is a quality assessment tool for genome assemblies. Running Quast on an assembly provides a detailed report about the statistics of the assembly, in pdf format.
-
-* Link to the paper: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/
-* GitHub page: https://github.com/ablab/quast
-* Quast manual: http://quast.bioinf.spbau.ru/manual
-
-The ```Quast``` module is installed on vital-IT. You can access the software by loading the module: ```module add UHTS/Quality_control/quast/4.1```. 
-
-### Usage?
-
-We will use the information in *.contigs.fasta to generate the assembly report.
-
-```sh
-# load the quality assessment module 
-module add UHTS/Quality_control/quast/4.1
-# generate the report 
-quast.py -R <path/to/reference_genome> *.contigs.fasta
-```
-
-The output is a directory, typically ```quast_results/<date_of_launch>``` containing several files. The most interesting for us is the report in pdf format. We can copy it to the local machine using ```scp```. 
-
-TODO: interesting questions about the report?
-
-
-TODO: questions on comparison of the assemblies 
-
-
-
-***TO DO: Emmanuel has done a nanook analysis on these reads. transfer the PDF to your laptop using ```scp```. Couldn't do it because permissions not set up correctly (email sent to Emmanuel).***
-
-***TO DO: Emmanuel told me the DNA fragments for PacBio were 10kb long. Is that made through sonication or size-selection?***
-
-![Question](img/round-help-button.png)
-Have a look at the ```nanoOK``` report for these reads. How does it compare to the report made on MinION reads?
-
-
-<!--
-TO DOs
-* check this paper https://dx.doi.org/10.7554/eLife.14258
-* check the porecamp material (analysis part): http://porecamp.github.io/timetable.html
-* Check Pradervand talk: http://edu.isb-sib.ch/pluginfile.php/3390/course/section/1574/Pradervand_Sequencing_CUSO2015.pdf
-* Will these modules be needed?
-```sh
-module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
-module add UHTS/PacBio/blasr/20140829;
-module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
-module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
-```
-* Idea: make them download maf files and reference genome, and open in IGV... Or is it possible to generate a picture on vital-it from IGV?
-
-![Question](img/round-help-button.png)
-![Tip](img/elemental-tip.png)
-![To do](img/wrench-and-hammer.png)
-![Warning](img/warning.png)
--->
