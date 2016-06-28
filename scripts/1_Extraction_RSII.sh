@@ -23,7 +23,4 @@ module add UHTS/PacBio/pbh5tools/0.8.0
 # convert all fast5 reads to fastq
 bash5tools.py $work_dir/lambda_RSII/raw_reads/m140715_200214_42182_c100661412550000001823125411271451_s1_p0.bas.h5 --outFilePrefix $work_dir/lambda_RSII/RSII_LambdaSubreads --readType subreads --outType fastq
 
-# get some stats on the raw data using poretools
-poretools stats $work_dir/lambda_minion/fast5/*.fast5 > $work_dir/lambda_minion/lambda_stats.txt
-
 1_Extraction_RSII.sh (END)
