@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #BSUB -L /bin/bash
-#BSUB -e 1_Extraction_MinION.err
-#BSUB -o 1_Extraction_MinION.out
 #BSUB -J Extraction_MinION
 #BSUB -q priority 
 
@@ -24,6 +22,5 @@ module add UHTS/Analysis/poretools/0.5.1
 poretools fastq --type 2D $work_dir/lambda_MinION/fast5/*.fast5 > $work_dir/lambda_MinION/MinION_Lambda2D.fastq
 
 # get some stats on the raw data using poretools
-poretools stats $work_dir/lambda_MinION/fast5/*.fast5 > $work_dir/lambda_MinION/MinION_Lambda2D_stats.txt
+poretools stats $work_dir/lambda_MinION/fast5/*.fast5 > $work_dir/lambda_MinION/MinION_Lambda_all_stats.txt
 
-1_Extraction_MinION.sh (END)
