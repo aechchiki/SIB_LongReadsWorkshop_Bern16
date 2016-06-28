@@ -93,7 +93,7 @@ mkdir <username> ; cd <username>
 ```sh
 pwd
 ```
-Expected output: ```/scratch/beegfs/weekly/<username>```)
+Expected output: ```/scratch/beegfs/weekly/<username>```
 
     
 ***
