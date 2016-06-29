@@ -298,6 +298,11 @@ awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
 
 ![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes is number of nucleotides, newlines and letters in all headers inside. Therefire you can roughly estimate the length of the assembly from the size of files.
 
+![help](img/help.png) If you are lost, you can get both assemblies of MinION and RSII reads by executing
+```sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
+```
+
 ### RSII
 
 One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
@@ -320,7 +325,7 @@ The assembly is now analogical to the assembly of MinION data
 
 ![help](img/help.png) If you are lost, you can get both assemblies of MinION and RSII reads by executing
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_assembly.sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_RSII_Assembly.sh
 ```
 
 ***
@@ -388,7 +393,7 @@ module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 
 ![help](img/help.png) If you are lost, you can get all quality stats of all assemblies by executing
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/3_assembly_quality.sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/3_Assembly_quality.sh
 ```
 
 ***
