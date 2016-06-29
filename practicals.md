@@ -26,6 +26,13 @@ The biological material sequenced using these two platforms is DNA from the [lam
 
 You will go through different steps, which include the extraction of reads from their native encoding formats ([HDF5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format)), their quality control, their mapping to a reference genome, and a *de-novo* genome assembly.
 
+In **MinION** every DNA fragments are forming a herpines with Y-form adapter on one side and the herpine-form adaptor on the other. When the Y-form adapter approaches the pore one strain starts to be sequenced by going though the pore, this sequence is called template. Once the herpine adapter is recognised, the complement sequence is read (called complement sequence). The consensus of those sequences is called 2D read.
+
+DNA fragments in SMRT sequencing of **PacBio** are sequenced in the forms of circular sequences with herpine-form adapters on both sides - SMRTbells. Once sequence reaches a well, it is attached to the bottom and continuously sequenced. Shorter fragments are read many times, however longer fragments of DNA can be read just one or twice, the total length of movie of the sequence is sufficient for up to 75000 nucleotide bassecalls in nowadays. The complete sequence is called polymerase read, when the adapters are cut, sequences are called subreads and of the consensus of subreads is called, it is called circular consensus read.
+
+![protocol](img/pb_reads.png)
+
+<!--
 The MinION library preparation protocol starts by DNA fragmentation, then the fragmented DNA is end-repaired and dA-tailed. Adapters are ligated to the dsDNA fragments. These adapters are in two flavors: Y-form and hairpin-form, allowing the generation of 2D reads. Both adapters are ligated to each end of the dsDNA fragments. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. An illustration of the protocol is provided in this [figure](http://www.genetics.org/content/202/1/37):
 
 ![protocol](img/protocol.jpg)
@@ -33,6 +40,19 @@ The MinION library preparation protocol starts by DNA fragmentation, then the fr
 In the MinION experiment you are going to analyze, the lambda phage DNA was fragmented using sonication (Covaris) to yield ~8kb-long fragments. One microgram of fragmented DNA material was then used for library preparation. Other protocols exist for smaller amounts of starting material. 
 
 The sequencing run produced a single ```.fast5``` file per pore. All files were then uploaded to the cloud for basecalling. The base-called files were downloaded back to vital-it. They are also in the ```.fast5``` format, but there is one file per read.
+
+![protocol](img/pb_reads.png)
+
+
+syntax of scripts to tools?
+
+text or picture??
+
+- polymerase reads: The full read
+- subreads: Sebreads separated by cutting out adapters.
+- circular consensus read: The consensus seqeunce of subreads. Note, that `ccs` seqeunce does not have to be computed in the `h5` files.
+
+-->
 
 <!--
 Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
@@ -102,6 +122,14 @@ Expected output: ```/scratch/beegfs/weekly/<username>```
 
 The output of MinION and PacBio RSII is stored in Hierarchical Data Format, what is basically an archive format (like `.zip` or `.tar`), but with very quick access to its content (You can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). In those files are more details about reads and basecalling. What, we need is just a simple `.fastq` for downstream analysis.
 
+![Tip](img/elemental-tip.png)
+The files saved in Hierarchical Data Format can be explored using HDF5 command-line tools:
+
+```sh
+h5dump <HDF_file> | less
+h5stat <HDF_file> | less
+```
+
 **fast5**
 
 MinION basecaller produces one file per read. In the file there is a time series of a current used for basecalling, basecalled template and complement reads (also called 1D reads) and consensus of 1D reads called 2D reads with comparably higher accuracy.
@@ -110,34 +138,13 @@ MinION basecaller produces one file per read. In the file there is a time series
 
 RSII system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio announced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RSII will be still in `.h5` formats we are going to work with.
 
-
 ### Tools
 
-**NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from ```.fast5``` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK). **NanoOK** is available on Vital-IT:
+All used tools are installed already on Vital-IT. Just before the first usage, you will have a command which loades the package.
 
-```sh
-module add UHTS/Analysis/NanoOK/0.72
-```
+**NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
 
-**pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). **pbh5tools** is available on Vital-IT: 
-
-```sh
-module add UHTS/PacBio/pbh5tools/0.8.0;
-```
-
-Read types of SMRT cell are: 
-
-<!--
-syntax of scripts to tools?
-
-text or picture??
-
-- polymerase reads: The full read
-- subreads: Sebreads separated by cutting out adapters.
-- circular consensus read: The consensus seqeunce of subreads. Note, that `ccs` seqeunce does not have to be computed in the `h5` files.
--->
-
-![protocol](img/pb_reads.png)
+**pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). 
 
 ### MinION
 
@@ -155,20 +162,15 @@ Can you guess what each file corresponds to? How many reads has this sequencing 
 ls lambda_minion/fast5/ | wc -l
 ```
 
-![Tip](img/elemental-tip.png)
-You can get a glimpse of the structure and organization of a ```.fast5/``` file using the HDF5 command-line tools:
-
-```sh
-h5dump file.fast5 | less
-h5stat file.fast5
-```
-
 ![To do](img/wrench-and-hammer.png)
-You will need to convert the MinION raw reads from their ```.fast5``` to a more classical and readable ```.fasta```. This can be done with the ```nanook extract``` utility, and takes around 10 minutes.
+You will need to convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `nanook extract` utility, and takes around 10 minutes.
 
 ```sh
-bsub -q priority "nanook extract -fasta -s lambda_minion"
+module add UHTS/Analysis/NanoOK/0.72
+bsub -q priority 'nanook extract -fastq -s lambda_minion'
 ```
+
+![To do](img/wrench-and-hammer.png) Cat all to one file... (TO ADD)
 
 ![Question](img/round-help-button.png)
 Do the quality scores seem to be improved in 2D reads? 
@@ -228,17 +230,13 @@ There are two leading assemblers for long reads Canu and Falcon. Canu is a fork 
 
 We will use Canu and Miniasm for both MinION and RSII assembly, then we check the assembly quality using the report provided by Quast. 
 
-**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and RSII data.
+**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and RSII data. Canu has many parameters, which are not discussed on this workshop, however all of them can be found in very detailed [manual](http://canu.readthedocs.io/en/stable/) of canu.
 
-* Link to the paper: http://www.nature.com/nbt/journal/v33/n6/abs/nbt.3238.html
-* GitHub page: https://github.com/marbl/canu
-* Canu manual: http://canu.readthedocs.io/en/stable/
-
-**Miniasm** is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used for a first proxy of the data content, but for the final assembly, another assembler should be considered. The first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
+**Miniasm** is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for the final assembly, another assembler should be considered. The first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
 
 ### MinION
 
-We assemble lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substantially worse, quality, so if we have enough 2D reads, we can use just them. The assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
+We assemble lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substantially worse quality, so we would like to avoid using them if we have enough 2D reads. Since we do, the assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
 
 **Canu**
 
@@ -298,7 +296,7 @@ bsub -q priority 'miniasm -f <reads.fq> <overlaps.paf.gz> > Lambda_contigs.gfa'
 awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
 ```
 
-![Question](img/round-help-button.png) How is it different, the assembly computed by `Canu` and `Miniasm`? [not much]
+![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes is number of nucleotides, newlines and letters in all headers inside. Therefire you can roughly estimate the length of the assembly from the size of files.
 
 ### RSII
 
@@ -312,7 +310,7 @@ head -12000 RSII_reads.fastq > RSII_reads_subset.fastq
 
 The assembly is now analogical to the assembly of MinION data
 
-![To do](img/wrench-and-hammer.png) Modify in the command of `Canu` the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
+![To do](img/wrench-and-hammer.png) Modify the command performing `Canu` assembly for RSII data. Change the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
 
 
 ![To do](img/wrench-and-hammer.png) Perform assembly of RSII data using miniasm as well.
@@ -328,6 +326,8 @@ bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_assembly.sh
 ***
 
 ## 3. Quality of assembly
+
+`Canu` produces a `.html` report for every performed step. You can find there amounts of reads after correction, filtering, etc. However, miniasm, does not therefore we use `Quast` for stats of all smeblies to get unified format. Then we will map assemblies to reference to find amount of expected differences.
 
 ### Tools
 
