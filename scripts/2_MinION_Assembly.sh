@@ -4,6 +4,8 @@
 #BSUB -J Assembly_all
 #BSUB -q priority 
 #BSUB -n 4
+#BSUB -R "rusage[mem=4096]"
+#BSUB -M 4194304
 
 ## prepare directory
 
@@ -19,7 +21,7 @@ module add UHTS/Analysis/miniasm/0.2.r137.dirty;
 
 ## Canu assembly
 
-canu -p lambda -d $work_dir/lambda_MinION/asm_canu/ genomeSize=48k -nanopore-raw $work_dir/lambda_MinION/MinION_Lambda2D.fastq -useGrid=false -maxThreads=4 &> canu_minion_lambda.log
+canu -p canu_MinION -d $work_dir/lambda_MinION/asm_canu/ genomeSize=48k -nanopore-raw $work_dir/lambda_MinION/MinION_Lambda2D.fastq -useGrid=false -maxThreads=4 &> canu_minion_lambda.log
 
 ## miniasm
 
