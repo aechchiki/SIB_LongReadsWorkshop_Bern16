@@ -15,7 +15,7 @@ and will open access it. You should see something like this:
 ![protocol](img/nano1_screenshot.png)
 
 2- A typical script to be executed on Vital-it nodes should be written this way (this is the an example based on the 1st exercise MinIon-extraction):
-![protocol](img/nano2_screenshot.pdf)
+![protocol](img/nano2_screenshot.png)
 
 3- When done in order to save your ```name_of_my_script.sh``` 
 
