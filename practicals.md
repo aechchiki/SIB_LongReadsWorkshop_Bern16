@@ -24,13 +24,16 @@ The aim of this practicals session is to get your hands on real long reads seque
 
 The biological material that was sequenced using these two platforms is DNA from the [lambda phage](http://en.wikipedia.org/wiki/Lambda_phage). This is not a particularly interesting genomic material for a long read sequencing study, since such a small genome can be assembled easily with short Illumina reads (check [this](https://peerj.com/articles/2055/) publication for example). However, its genome is small (48kb), which makes it feasible to run an analysis yourself during the limited time of this practicals session.
 
-You will go through different steps, which include the extraction of reads from their native encoding formats ([HDF5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format)), quality control, *de-novo* genome assembly, and a mapping of reads to a reference genome.
+You will go through different steps, which include the extraction of reads from their native encoding formats ([HDF5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format)), quality control, *de novo* genome assembly, and a mapping of reads to a reference genome.
 
 After DNA fragmentation, the **MinION** library is prepared by ligating adapters to the double-stranded DNA fragments. One side receives a Y-form adapter, and the other side a hairpin-form adaptor. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. When the Y-form adapter approaches the pore, one strand starts to be sequenced. This sequence is called *template*. After the hairpin-form adapter is sequenced, the *complement* sequence is read. The consensus of template and complement sequences is called a *2D read*. An illustration of the protocol is provided in this [figure](http://www.genetics.org/content/202/1/37):
 
 ![protocol](img/protocol.jpg)
+<!--
+TO DO: find a better picture of the sequencing being done?
+-->
 
-For **PacBio** sequencing (or **SMRT** sequencing), hairpin-form adapters (SMRTbell) are ligated on both sides of double-stranded DNA fragments, forming a circular sequence. Circular sequences attach to the bottom of theSMRT cell wells, and are continuously read, and a movie is recorded. Nowadays, the total length of movie allows to record up to 75000 nucleotide basecalls. This implies that short DNA fragments will be read many times, while long fragments may be read just one or twice. The complete sequence is called a *polymerase* read. After the adapter sequences are removed, the sequence is split into *subreads*. The consensus of subreads is called a *circular consensus read* or *read of insert*.
+For **PacBio** sequencing (or **SMRT** sequencing), hairpin-form adapters (SMRTbell) are ligated on both sides of double-stranded DNA fragments, forming a circular sequence. Circular sequences attach to the bottom of theSMRT cell wells, and are continuously read, and a movie is recorded. Nowadays, the total length of movie allows to record up to 75,000 nucleotide basecalls. This implies that short DNA fragments will be read many times, while long fragments may be read just one or twice. The complete sequence is called a *polymerase* read. After the adapter sequences are removed, the sequence is split into *subreads*. The consensus of subreads is called a *circular consensus read* or *read of insert*.
 
 ![protocol](img/pb_reads.png)
 
@@ -73,11 +76,11 @@ cd /scratch/beegfs/weekly/
 ```
 
 ![Warning](img/warning.png)
-Be careful, files in this folder are erased after a week. At the end of the practicals, if you want to keep your results, you need to back-up the data, for example in a compressed tarball that you move to your home or archive folder.
+Be careful, files in this folder are erased after a week. At the end of the practicals, if you want to keep your results, you need to back-up the data, for example in a compressed tarball that you move to your home or archive folder, or to another computer.
 
 * Create your own directory:
 ```sh
-mkdir <username> ; cd <username>
+mkdir <username>; cd <username>
 ```
 
 * You will always be working from this directory. Before launching commands please be sure that you are located in the right directory by typing: ```pwd```. The expected output is: ```/scratch/beegfs/weekly/<username>```
@@ -87,10 +90,13 @@ mkdir <username> ; cd <username>
 It is not allowed to launch any calculation on the frontal machine where you are connected (```prd.vital-it.ch```). You need to submit each job for batched execution through a job scheduler that will dispatch it on the cluster nodes. For example:
 ```sh
 bsub '[my command line here]'
+```
+Or f you have written your commands in a script:
+```sh
 bsub < script.sh
 ```
 
-TO DO (walid): list useful bsub commands options:
+TO DO (walid): list useful bsub commands options + 1 example using them all:
 * priority queue `-q priority`
 * Memory usage? `-M / -R`
 * How to get output and error in files instead of email: `-o / -e`
@@ -164,7 +170,7 @@ To access quality values, you can use `fastqc` software, as for short-reads data
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_MinION.sh
 ```
 
-### Pacbio RS II
+### PacBio RS II
 ```sh
 module add UHTS/PacBio/pbh5tools/0.8.0;
 ```
@@ -284,7 +290,7 @@ awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
 
-### Pacbio RS II
+### PacBio RS II
 
 One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
 
@@ -400,7 +406,7 @@ You can try to align reads with other aligners. For example to use `BWA-MEM`, yo
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
 ```
 
-### Pacbio RS II
+### PacBio RS II
 
 ![help](img/help.png) If you are lost, you can perform mapping of RS II reads by executing
 ```sh
@@ -435,7 +441,7 @@ Take some time to read and understand the report. Here are a few questions that 
 
 * Have a look at the k-mer over and under-representation analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
-### Pacbio RS II
+### PacBio RS II
 
 ![help](img/help.png) If you are lost, you can perform a quality control report of mapping by executing
 ```sh
