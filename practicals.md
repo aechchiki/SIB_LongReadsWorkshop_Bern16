@@ -128,7 +128,7 @@ All used tools are already installed on Vital-IT. Before the first use, you will
 TO DO: maybe this paragrpah needs to be moved down to the mapping part
 -->
 
-**Poretools** is a flexible toolkit for working with sequencing data from MinION, for the purposes of quality control and downstream analysis. It operates directly on the native `.fast5` format and provides format conversion utilities and data exploration tools. Software usage is detailed in the [documentation](http://poretools.readthedocs.io/en/latest/).
+**Poretools** is a toolkit for working with sequencing data from MinION, for the purposes of quality control and downstream analysis. It operates directly on the native `.fast5` format and provides format conversion utilities and data exploration tools. Software usage is detailed in the [documentation](http://poretools.readthedocs.io/en/latest/).
 
 **pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). 
 
@@ -139,8 +139,10 @@ First, create a working directory for MinION raw reads and create links to the r
 mkdir -p lambda_minion/fast5/
 ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/MinION_lambda_reads/*.fast5 lambda_minion/fast5/
 ```
+
 ![Question](img/round-help-button.png)
 Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
+
 <!--
 ```sh
 ls lambda_minion/fast5/ | wc -l
