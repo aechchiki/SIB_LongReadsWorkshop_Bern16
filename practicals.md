@@ -26,7 +26,7 @@ The biological material that was sequenced using these two platforms is DNA from
 
 You will go through different steps, which include the extraction of reads from their native encoding formats ([HDF5](http://en.wikipedia.org/wiki/Hierarchical_Data_Format)), quality control, *de novo* genome assembly, and a mapping of reads to a reference genome.
 
-After DNA fragmentation, the **MinION** library is prepared by ligating adapters to the double-stranded DNA fragments. One side receives a Y-form adapter, and the other side a hairpin-form adaptor. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. When the Y-form adapter approaches the pore, one strand starts to be sequenced. This sequence is called *template*. After the hairpin-form adapter is sequenced, the *complement* sequence is read. The consensus of template and complement sequences is called a *2D read*. An illustration of the protocol is provided in this [figure](http://www.genetics.org/content/202/1/37):
+After DNA fragmentation, the **MinION** library is prepared by ligating adapters to the double-stranded DNA fragments. One side receives a Y-form adapter, and the other side a hairpin-form adaptor. The adapters are conjugated with motor proteins that help control the translocation speed of DNA through the pore. When the Y-form adapter approaches the pore, one strand starts to be sequenced. This sequence is called *template*. After the hairpin-form adapter is sequenced, the *complement* sequence is read. The template and complement sequences are sometimes called *1D reads*. The consensus of template and complement sequences is called a *2D read*. An illustration of the protocol is provided in this [figure](http://www.genetics.org/content/202/1/37):
 
 ![protocol](img/protocol.jpg)
 <!--
@@ -91,7 +91,7 @@ It is not allowed to launch any calculation on the frontal machine where you are
 ```sh
 bsub '[my command line here]'
 ```
-Or f you have written your commands in a script:
+Or if you have written your commands in a script:
 ```sh
 bsub < script.sh
 ```
@@ -100,112 +100,126 @@ TO DO (walid): list useful bsub commands options + 1 example using them all:
 * priority queue `-q priority`
 * Memory usage? `-M / -R`
 * How to get output and error in files instead of email: `-o / -e`
+* Job name: `-J`
+* How to check status of jobs: `bjobs`
 
 ## 1. Read extraction
 
-The output of MinION and PacBio RS II is stored in Hierarchical Data Format, what is basically an archive format (like `.zip` or `.tar`), but with very quick access to its content (You can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). In those files are more details about reads and basecalling. What, we need is just a simple `.fastq` for downstream analysis.
+### Formats
+The output of MinION and PacBio RS II are stored in Hierarchical Data Format, that is basically an archive format (like `.zip` or `.tar`), but allowing a very quick access to its content (you can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). Those files include all details about reads and basecalling. What we need will need for this practical are just the sequences and their qualities, that can be stored in a simple `.fastq`.
 
 ![Tip](img/elemental-tip.png)
 The files saved in Hierarchical Data Format can be explored using HDF5 command-line tools:
-
 ```sh
 h5dump <HDF_file> | less
 h5stat <HDF_file> | less
 ```
 
-**fast5**
+#### fast5
+The MinION basecaller produces one file per read, which includes the time series of the measured ionic current used for basecalling, the basecalled template and complement read sequences, and the consensus 2D reads.
 
-MinION basecaller produces one file per read. In the file there is a time series of a current used for basecalling, basecalled template and complement reads (also called 1D reads) and consensus of 1D reads called 2D reads with comparably higher accuracy.
-
-**bas.h5 & bax.h5**
-
-The RS II system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell, `bas.h5` contains metainformations. PacBio announced a change of data format to specialised `.bam` for platform Sequel, however all data produced by RS II will be still in `.h5` formats we are going to work with.
+#### bas.h5 and bax.h5
+The PacBio RS II system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell. The `bas.h5` file contains metadata. PacBio announced a change of data format to more classcial `.bam` files for the next platform (called *Sequel*), however all data produced by the RS II platform will be still in the `.h5` formats we are going to work with.
 
 ### Tools
-
-All used tools are installed already on Vital-IT. Just before the first usage, you will have a command which loades the package.
+All used tools are already installed on Vital-IT. Before the first use, you will just need to load the package.
 
 **NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
 
 **pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). 
 
-### MinION
-
-![To do](img/wrench-and-hammer.png)
+### Extraction of MinION reads
 First, create a working directory for MinION raw reads and create links to the raw sequencing files.
 
 ```sh
 mkdir -p lambda_minion/fast5/
-ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/minion_lambda_reads/*.fast5 lambda_minion/fast5/
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/MinION_lambda_reads/*.fast5 lambda_minion/fast5/
 ```
 ![Question](img/round-help-button.png)
-Can you guess what each file corresponds to? How many reads has this sequencing experiment produced? [TO ADD]
-
+1Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
+<!--
 ```sh
 ls lambda_minion/fast5/ | wc -l
 ```
+5559 reads
+-->
 
 ![To do](img/wrench-and-hammer.png)
-You will need to convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `nanook extract` utility, and takes around 10 minutes.
+You will convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `nanook extract` utility, and takes around 10 minutes. Please refer to the documentation to find out how to run the program and which options to use.
 
 ```sh
 module add UHTS/Analysis/NanoOK/0.72
-bsub -q priority 'nanook extract -fastq -s lambda_minion'
+bsub -q priority -o minion_extract.out -e minion_extract.err -R "rusage[mem=4096]" 'nanook extract [...]'
 ```
-TO DO: shouldn't it be rather this?
-```sh
-bsub -q priority 'module add UHTS/Analysis/NanoOK/0.72; nanook extract -fastq -s lambda_minion'
-```
+<!--
+bsub -q priority -o minion_extract.out -e minion_extract.err -J minion_extract -R "rusage[mem=4096]" 'nanook extract -fastq -s lambda_minion'
+-->
 
-![To do](img/wrench-and-hammer.png) Cat all to one file... (TO ADD)
+![Question](round-help-button.png)
+What folders are created by ```nanoOK```? What do they include?
+
+![To do](img/wrench-and-hammer.png)
+Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
 
 ![Question](img/round-help-button.png)
 Do the quality scores seem to be improved in 2D reads? 
 
-![Tip](img/elemental-tip.png)
-To access quality values, you can use `fastqc` software, as for short-reads data. Reported stats are correct, just keep in mind that warning flags in the report are for assembly by short reads and therefore not very informative.
+It might be convenient to concatenate all produced `.fastq` files for 2D reads to a single (compressed) file:
+```sh
+cat lambda_minion/fastq/2D/*fastq | gzip -9 > lambda_minion/fastq/all_2D_reads.fastq.gz
+```
+**TO DO: use bsub**
 
-![help](img/help.png) If you are lost, you can get extracted MinION reads by executing
+![Tip](img/elemental-tip.png)
+For basic quality control of the reads, you can launch the `fastqc` software (widely used for Illumina data) on this `fastq.gz` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
+
+![help](img/help.png) If you are lost, you can get extracted MinION reads by executing the following script. While the script is running, have a look at it to understand what is done.
 ```sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_MinION.sh
 ```
 
-### PacBio RS II
-```sh
-module add UHTS/PacBio/pbh5tools/0.8.0;
-```
-
-![To do](img/wrench-and-hammer.png) Extract also RS II reads using 
-
+### Extraction of PacBio RS II reads
+First, create a working directory for raw reads and create links to the raw sequencing files.
 ```sh
 mkdir -p lambda_RSII/raw_reads/
 ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/RSII_lambda_reads/*.h5 lambda_RSII/raw_reads/
 ```
 
 ![Question](img/round-help-button.png)
-How reads of many SMRT cells we have? [1]
+How many SMRT cells do we have? 
+<!--
+[1]
+-->
 
-![To do](img/wrench-and-hammer.png) Extract RS II reads using `bash5tools.py` from `pbh5tools`.
+![To do](img/wrench-and-hammer.png)
+Extract PacBio subreads using `bash5tools.py` from `pbh5tools`.
 
 ```sh
-bsub -q priority bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq
+module add UHTS/PacBio/pbh5tools/0.8.0
+bsub -q priority -o RSII_extract.out -e RSII_extract.err -J RSII_extract 'bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq'
 ```
+**TO DO: should we give the full command? Or give hints to the useful options? I think it's better that they refer to the doc themslves**
 
 ![Question](img/round-help-button.png)
-How many reads has was produced by the SMRT cell? [132269]
-
-
+How many subreads were produced? 
+<!--
 ```sh
 wc -l <prefix_for_extracted_reads>.fastq   # reads in fastq = number of lines / 4
 ```
+[132269]
+-->
 
-![help](img/help.png) If you are lost, you can get extracted RS II reads by executing
+We will compress this file and move it the PacBio data folder:
+```sh
+gzip -9 [fastq file]; mv [fastq.gz file] lambda_RSII/
+```
+**TO DO: use bsub**
+**TO DO: is there a way to do this directly with bash5tools.py?**
 
+![help](img/help.png) If you are lost, you can get extracted PacBio reads by executing
 ```sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_RSII.sh
 ```
-
-***
 
 ## 2. Genome assembly
 
@@ -215,9 +229,9 @@ There are two leading assemblers for long reads Canu and Falcon. Canu is a fork 
 
 ### Tools
 
-We will use Canu and Miniasm for both MinION and RS II assembly, then we check the assembly quality using the report provided by Quast. 
+We will use Canu and Miniasm for both MinION and PacBio assembly, then we check the assembly quality using the report provided by Quast. 
 
-**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and RS II data. Canu has many parameters, which are not discussed on this workshop, however all of them can be found in very detailed [manual](http://canu.readthedocs.io/en/stable/) of canu.
+**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and PacBio data. Canu has many parameters, which are not discussed on this workshop, however all of them can be found in very detailed [manual](http://canu.readthedocs.io/en/stable/) of canu.
 
 **Miniasm** is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for the final assembly, another assembler should be considered. The first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
 
@@ -285,7 +299,7 @@ awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
 
 ![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes is number of nucleotides, newlines and letters in all headers inside. Therefire you can roughly estimate the length of the assembly from the size of files.
 
-![help](img/help.png) If you are lost, you can get both assemblies of MinION and RS II reads by executing
+![help](img/help.png) If you are lost, you can get both assemblies of MinION and PacBio reads by executing
 ```sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
@@ -294,7 +308,7 @@ bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.
 
 One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
 
-![To do](img/wrench-and-hammer.png) Go to directory with extracted RS II reads and take a subset of the first 3,000 reads.
+![To do](img/wrench-and-hammer.png) Go to directory with extracted PacBio reads and take a subset of the first 3,000 reads.
 
 ```sh
 head -12000 RSII_reads.fastq > RSII_reads_subset.fastq
@@ -302,15 +316,15 @@ head -12000 RSII_reads.fastq > RSII_reads_subset.fastq
 
 The assembly is now analogical to the assembly of MinION data
 
-![To do](img/wrench-and-hammer.png) Modify the command performing `Canu` assembly for RS II data. Change the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
+![To do](img/wrench-and-hammer.png) Modify the command performing `Canu` assembly for PacBio data. Change the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
 
 
-![To do](img/wrench-and-hammer.png) Perform assembly of RS II data using miniasm as well.
+![To do](img/wrench-and-hammer.png) Perform assembly of PacBio data using miniasm as well.
 
-![Question](img/round-help-button.png) What is are the lengths of all four assemblies? Is there anything weird going on? [yes, RS II reads are not assembled well.]
+![Question](img/round-help-button.png) What is are the lengths of all four assemblies? Is there anything weird going on? [yes, PacBio reads are not assembled well.]
 
 
-![help](img/help.png) If you are lost, you can get both assemblies of MinION and RSII reads by executing
+![help](img/help.png) If you are lost, you can get both assemblies of MinION and PacBio reads by executing
 ```sh
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_RSII_Assembly.sh
 ```
@@ -401,14 +415,14 @@ It is possible to specify to `nanook align` the alignment parameters to be used 
 ### Bonus (or at home)
 You can try to align reads with other aligners. For example to use `BWA-MEM`, you first need to load the corresponding module on vital-IT (`module add UHTS/Aligner/bwa/0.7.13`), create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
 
-![help](img/help.png) If you are lost, you can perform mapping of RS II reads by executing
+![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
 ```sh
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
 ```
 
 ### PacBio RS II
 
-![help](img/help.png) If you are lost, you can perform mapping of RS II reads by executing
+![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
 ```sh
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
 ```
@@ -461,6 +475,11 @@ module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
 module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 ```
 * Idea: make them download maf files and reference genome, and open in IGV... Or is it possible to generate a picture on vital-IT from IGV?
+
+* TO DO: export final HTML and send to Patricia for testing
+Fork to SIB github
+https://github.com/sib-swiss/2016-07-05-longreads-bern 
+
 
 ![Question](img/round-help-button.png)
 ![Tip](img/elemental-tip.png)
