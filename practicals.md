@@ -30,7 +30,7 @@ After DNA fragmentation, the **MinION** library is prepared by ligating adapters
 
 ![protocol](img/protocol.jpg)
 <!--
-TO DO: find a better picture of the sequencing being done?
+TO DO: find a better picture of the read going trhough the pore?
 -->
 
 For **PacBio** sequencing (or **SMRT** sequencing), hairpin-form adapters (SMRTbell) are ligated on both sides of double-stranded DNA fragments, forming a circular sequence. Circular sequences attach to the bottom of theSMRT cell wells, and are continuously read, and a movie is recorded. Nowadays, the total length of movie allows to record up to 75,000 nucleotide basecalls. This implies that short DNA fragments will be read many times, while long fragments may be read just one or twice. The complete sequence is called a *polymerase* read. After the adapter sequences are removed, the sequence is split into *subreads*. The consensus of subreads is called a *circular consensus read* or *read of insert*.
@@ -39,8 +39,6 @@ For **PacBio** sequencing (or **SMRT** sequencing), hairpin-form adapters (SMRTb
 
 <!--
 In the MinION experiment you are going to analyze, the lambda phage DNA was fragmented using sonication (Covaris) to yield ~8kb-long fragments. One microgram of fragmented DNA material was then used for library preparation. Other protocols exist for smaller amounts of starting material. 
-
-The sequencing run produced a single ```.fast5``` file per pore. All files were then uploaded to the cloud for basecalling. The base-called files were downloaded back to vital-IT. They are also in the ```.fast5``` format, but there is one file per read.
 
 Details of protocol: https://community.nanoporetech.com/protocols/experiment-companion-for-control-dna/v/cde_1001_v1_revm_18may2016-374
 
@@ -60,11 +58,11 @@ In order to connect to the cluster and set up your working directory follow the 
 
 In a terminal, type ```ssh <username>@prd.vital-it.ch```. You will be prompted to input your user password (```<username>@prd.vital-it.ch's password:```). Type in your password (you will not see what you are typing) and press Enter.
 
-You are in! Jump to: "Setting up your working directory".
+You are in! Jump to [Setting up your working directory].
 
 ### For Windows users
 
-You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to: "Setting up your working directory".
+You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to [Setting up your working directory].
 
 If you do not have a ssh client, follow [these steps](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf). 
 
@@ -91,17 +89,17 @@ It is not allowed to launch any calculation on the frontal machine where you are
 ```sh
 bsub '[my command line here]'
 ```
-Or if you have written your commands in a script:
+Or, better, write your commands in a script and submit it with:
 ```sh
 bsub < script.sh
 ```
+Please have a look at [this short tutorial](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it-usage.md) to help you write such a script yourself, with the `Nano` text editor.
 
-TO DO (walid): list useful bsub commands options + 1 example using them all:
-* priority queue `-q priority`
+<!--
+TO DO?
 * Memory usage? `-M / -R`
-* How to get output and error in files instead of email: `-o / -e`
-* Job name: `-J`
-* How to check status of jobs: `bjobs`
+* Make them download a skeleton of a submission script, to save time in writting it?
+-->
 
 ## 1. Read extraction
 
@@ -124,7 +122,13 @@ The PacBio RS II system produces three `bax.h5` files and a `bas.h5` per SMRT ce
 ### Tools
 All used tools are already installed on Vital-IT. Before the first use, you will just need to load the package.
 
+<!--
 **NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
+
+TO DO: maybe this paragrpah needs to be moved down to the mapping part
+-->
+
+**Poretools** is a flexible toolkit for working with sequencing data from MinION, for the purposes of quality control and downstream analysis. It operates directly on the native `.fast5` format and provides format conversion utilities and data exploration tools. Software usage is detailed in the [documentation](http://poretools.readthedocs.io/en/latest/).
 
 **pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). 
 
@@ -136,42 +140,62 @@ mkdir -p lambda_minion/fast5/
 ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/MinION_lambda_reads/*.fast5 lambda_minion/fast5/
 ```
 ![Question](img/round-help-button.png)
-1Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
+Can you guess what each file corresponds to? How many reads has this sequencing experiment produced?
 <!--
 ```sh
 ls lambda_minion/fast5/ | wc -l
 ```
-5559 reads
+Answer: 5559 reads
 -->
 
+<!--
 ![To do](img/wrench-and-hammer.png)
 You will convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `nanook extract` utility, and takes around 10 minutes. Please refer to the documentation to find out how to run the program and which options to use.
 
 ```sh
 module add UHTS/Analysis/NanoOK/0.72
 bsub -q priority -o minion_extract.out -e minion_extract.err -R "rusage[mem=4096]" 'nanook extract [...]'
-```
-<!--
 bsub -q priority -o minion_extract.out -e minion_extract.err -J minion_extract -R "rusage[mem=4096]" 'nanook extract -fastq -s lambda_minion'
--->
+```
 
 ![Question](round-help-button.png)
 What folders are created by ```nanoOK```? What do they include?
 
 ![To do](img/wrench-and-hammer.png)
 Choose one file at random in the ```fastq/2D``` folder and compare the quality scores with the corresponding file in the ```fastq/Template``` folder. You can refer to this page for help on the PHRED quality scores in ```.fastq``` files: http://en.wikipedia.org/wiki/FASTQ_format#Encoding.
+-->
 
-![Question](img/round-help-button.png)
-Do the quality scores seem to be improved in 2D reads? 
-
-It might be convenient to concatenate all produced `.fastq` files for 2D reads to a single (compressed) file:
-```sh
-cat lambda_minion/fastq/2D/*fastq | gzip -9 > lambda_minion/fastq/all_2D_reads.fastq.gz
+![To do](img/wrench-and-hammer.png)
+You will convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `poretools fastq` utility. To find out about options to use, please refer to the [documentation](http://poretools.readthedocs.io/en/latest/content/examples.html#poretools-fastq), or type `poretools fastq -h`. For now, we are interested in extracting all types of reads (template, complement and 2D, so the option `--type all` should be used). Be careful that the `.fastq` file is written in the standard output, so you need to redirect the standard output to a file using `>`, for example: 
+``` sh
+poretools fastq [...] > lambda_minion/all_reads.fastq
+## Or, even better:
+poretools fastq [...] | gzip -9 > lambda_minion/all_reads.fastq.gz
 ```
-**TO DO: use bsub**
+**TO DO: the output is still written in the .out file. How to deactivate this?**
+
+![Warning](img/warning.png)
+Remember, that it is not allowed to launch your command on the frontal machine. You need to write your `poretools` command in a bash script (called for example `minion_extract.sh`) that you will submit to the cluster with `bsub` (see [Submitting commands to the cluster]):
+```sh
+module add UHTS/Analysis/poretools/0.5.1
+bsub < minion_extract.sh
+```
+
+<!--
+bsub -q priority -o minion_extract.out -e minion_extract.err -J minion_extract 'poretools fastq lambda_minion/fast5 | gzip -9 > lambda_minion/all_reads.fastq.gz'
+For 2D reads only add: --type 2D 
+-->
+
+![Question](round-help-button.png)
+Have a look at the `.fastq` file created, for example using `less`. Do you identify which reads are 2D, template or complement reads? 
+
+At the beginning of the sequence header of a 2D read (starting with a `@`), you can find a hash looking something like this: `ddf8535b-539b-45b8-8203-657eefc94bda`. Searching for this pattern in the file allows you to find the template and complement reads used to produce this 2D read.
+
+![Question](round-help-button.png)
+Do the quality scores seem to be improved in 2D reads? You can refer to [this wikipedia page](http://en.wikipedia.org/wiki/FASTQ_format#Encoding) for help on the PHRED quality scores in `.fastq` files. 
 
 ![Tip](img/elemental-tip.png)
-For basic quality control of the reads, you can launch the `fastqc` software (widely used for Illumina data) on this `fastq.gz` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
+For basic quality control of the reads, you can also launch the `fastqc` software (widely used for Illumina data) on this `fastq.gz` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
 
 ![help](img/help.png) If you are lost, you can get extracted MinION reads by executing the following script. While the script is running, have a look at it to understand what is done.
 ```sh
@@ -469,7 +493,6 @@ TO DOs
 * Check Pradervand talk: http://edu.isb-sib.ch/pluginfile.php/3390/course/section/1574/Pradervand_Sequencing_CUSO2015.pdf
 * Will these modules be needed?
 ```sh
-module add UHTS/Analysis/poretools/0.5.1 # load poretools (read extraction)
 module add UHTS/PacBio/blasr/20140829;
 module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
 module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
@@ -480,6 +503,7 @@ module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 Fork to SIB github
 https://github.com/sib-swiss/2016-07-05-longreads-bern 
 
+* TO DO: cut lines of code that are too long
 
 ![Question](img/round-help-button.png)
 ![Tip](img/elemental-tip.png)
