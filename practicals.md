@@ -267,7 +267,8 @@ Canu is an assembler for noisy long-reads sequences. It is a fork of Celera with
 #### Miniasm
 Miniam is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for a final assembly, another assembler should be considered. As a first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
 
-**TO DO** Add small paragraph Quast
+#### Quast
+Quast is a tool to evaluate genome assemblies. It provides an exaustive report providing metrics on contigs. It can also be used for comparison between assemblies, or to compare a *de novo* assembly to a reference genome. 
 
 ### MinION
 We will assemble the lambda phage genome using only the 2D reads. 1D reads are of substantially lower quality, so we would like to avoid using them if we have enough 2D reads. Since we do (~3,000 reads, i.e., coverage of ~500X), the assembly should be trivial: the genome is 48.8 kb and we have some reads of 20kb. We expect only one contig!
