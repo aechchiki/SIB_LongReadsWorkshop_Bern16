@@ -123,7 +123,8 @@ First, create a working directory for MinION raw reads and create links to the r
 
 ```sh
 mkdir -p lambda_minion/fast5/
-ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/MinION_lambda_reads/*.fast5 lambda_minion/fast5/
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/MinION_lambda_reads/*.fast5 \
+  lambda_minion/fast5/
 ```
 
 ![Question](img/round-help-button.png)
@@ -204,7 +205,8 @@ TO DO in backup script
 First, create a working directory for raw reads and create links to the raw sequencing files.
 ```sh
 mkdir -p lambda_RSII/raw_reads/
-ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/RSII_lambda_reads/*.h5 lambda_RSII/raw_reads/
+ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/RSII_lambda_reads/*.h5 \
+  lambda_RSII/raw_reads/
 ```
 
 ![Question](img/round-help-button.png)
@@ -216,8 +218,11 @@ Answer: 1
 ![To do](img/wrench-and-hammer.png)
 Extract PacBio subreads using `bash5tools.py` from `pbh5tools`. Again, refer to the [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). The commands will look like this:
 ```sh
-bash5tools.py <file.bas.h5> --outFilePrefix lambda_RSII/<prefix_for_extracted_reads> --readType subreads --outType fastq
-## compress the output file
+bash5tools.py <file.bas.h5> \
+  --outFilePrefix lambda_RSII/<prefix_for_extracted_reads> \
+  --readType subreads \
+  --outType fastq
+# compress the output file:
 gzip -9 lambda_RSII/[prefix.fastq]
 ```
 Put the full command in a script and submit it using bsub:
@@ -305,7 +310,9 @@ I commented out the Miniasm assembly for MinIOn since it is done for pacbio belo
 ![To do](img/wrench-and-hammer.png) You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
 
 ```sh
-minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> | gzip -9 > <overlaps.gz>
+minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> | 
+  gzip -9 > 
+  <overlaps.gz>
 ```
 
 <!--
@@ -338,6 +345,7 @@ bsub < minion_assembly_miniasm.sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
 
+<!--
 **Miniasm assembly of MinION reads is only 29kb -> only use miniasm with pacbio (since canu doesn't give an assembly of the rigth size)**
 -->
 
@@ -347,7 +355,10 @@ One PacBio RS II SMRT cell produces between 0.5 and 1 gb. This roughly correspon
 ![To do](img/wrench-and-hammer.png) 
 Go to the directory including the extracted PacBio reads and extract a subset of the first 3,000 reads.
 ```sh
-zcat RSII_reads.fastq.gz | head -12000 | gzip -9 > RSII_reads_subset.fastq
+zcat RSII_reads.fastq.gz | 
+  head -12000 | 
+  gzip -9 > 
+  RSII_reads_subset.fastq
 ```
 
 The assembly step is now analogous to the assembly of MinION data. 
@@ -382,7 +393,9 @@ Since the assembly with Canu does not seem to be successful, we will try a diffe
 You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
 
 ```sh
-minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> | gzip -9 > <overlaps.gz>
+minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> | 
+  gzip -9 > 
+  <overlaps.gz>
 ```
 <!--
 module add UHTS/Analysis/minimap/0.2.r124.dirty;
@@ -436,13 +449,18 @@ MUMmer is a software for rapidly aligning entire genomes, whether in complete or
 mkdir reference/
 cd reference/
 wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/Enterobacteria_phage_lambda_uid14204/NC_001416.fna
-ln -s NC_001416.fna lambda_ref_genome.fa # a clearer name
+# change to a clearer name:
+ln -s NC_001416.fna lambda_ref_genome.fa 
 ```
 
 ### Running Quast
 The command in your submission script should look something like this:
 ```sh
-quast.py -R <path to reference genome> <path to Canu MinION assembly> <path to Canu PacBio assembly> <path to Miniasm PacBio assembly> 
+quast.py 
+  -R <path to reference genome> 
+  <path to Canu MinION assembly> 
+  <path to Canu PacBio assembly> 
+  <path to Miniasm PacBio assembly> 
 ```
 
 ![To do](img/wrench-and-hammer.png)
@@ -477,7 +495,8 @@ It would be interesting to know more precisely what is going on with PacBio asse
 
 ```sh
 mkdir mummer/
-mummer -mum -b -c <assembly_1.fa> <assembly_2.fa> > mummer/<assembly_1_vs_2.mums>
+mummer -mum -b -c <assembly_1.fa> <assembly_2.fa> > 
+  mummer/<assembly_1_vs_2.mums>
 ```
 
 <!--
