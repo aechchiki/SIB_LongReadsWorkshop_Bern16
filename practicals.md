@@ -195,6 +195,11 @@ Focus on a 2D read chosen at random. Look for the corresponding template and com
 ![Question](img/round-help-button.png)
 Do the quality scores seem to be improved in 2D reads? You can refer to [this wikipedia page](http://en.wikipedia.org/wiki/FASTQ_format#Encoding) for help on the PHRED quality scores in `.fastq` files. 
 
+<!--
+TO DO? 
+Poretools stats
+-->
+
 ![Tip](img/elemental-tip.png)
 We will not do this today, but for basic quality control of the reads, you can also launch the `fastqc` software (widely used for Illumina data) on this `fastq` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
 
@@ -224,10 +229,9 @@ Answer: 1
 ![To do](img/wrench-and-hammer.png)
 Extract PacBio subreads using `bash5tools.py` from `pbh5tools`. Again, refer to the [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). The commands will look like this:
 ```sh
-bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq
-## compress this file and move it the PacBio data folder
-gzip -9 [prefix.fastq]
-mv [prefix.fastq.gz] lambda_RSII/
+bash5tools.py <file.bas.h5> --outFilePrefix lambda_RSII/<prefix_for_extracted_reads> --readType subreads --outType fastq
+## compress the output file
+gzip -9 lambda_RSII/[prefix.fastq]
 ```
 
 Put the full command in a script and submit it using bsub:
@@ -252,91 +256,104 @@ bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_RSII.
 ```
 
 ## 2. Genome assembly
-
-Long reads genome assembly is just like established short-reads assembly based on graph theory, but string graphs are used instead of De Brujin. Instead of kmer decomposition, the graph of reads (nodes) and their overlaps (edges) is constructed.
-
-There are two leading assemblers for long reads Canu and Falcon. Canu is a fork of Celera with added modules for error correction and trimming of reads. Falcon is an assembler aware of ploidy developed from scratch for PacBio data.
+Genome assembly with long reads is, just like the established assembly with short-reads, based on graph theory. But string graphs are used instead of De Brujin graphs, and instead of kmer decomposition, the graph of reads (nodes) and their overlaps (edges) is constructed.
 
 ### Tools
+We will use Canu and Miniasm for assembly using both MinION and PacBio reads, then we check the assembly quality using the report provided by Quast. 
 
-We will use Canu and Miniasm for both MinION and PacBio assembly, then we check the assembly quality using the report provided by Quast. 
+#### Canu
+Canu is an assembler for noisy long-reads sequences. It is a fork of Celera with added modules for error correction and trimming of reads. Canu was designed for both MinION and PacBio data, and is one of the two leading assemblers for longs reads (together with Falcon). Canu has many parameters, which are not discussed on this workshop, but many details are given in the [manual](http://canu.readthedocs.io/en/stable/).
 
-**Canu** is an assembler for noisy long-reads sequences. Canu will correct the reads, trim suspicious regions, then assemble the corrected and cleaned reads into unitigs. Note: this software was designed for both MinION and PacBio data. Canu has many parameters, which are not discussed on this workshop, however all of them can be found in very detailed [manual](http://canu.readthedocs.io/en/stable/) of canu.
+#### Miniasm
+Miniam is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for a final assembly, another assembler should be considered. As a first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
 
-**Miniasm** is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for the final assembly, another assembler should be considered. The first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
+**TO DO** Add small paragraph Quast
 
 ### MinION
+We will assemble the lambda phage genome using only the 2D reads. 1D reads are of substantially lower quality, so we would like to avoid using them if we have enough 2D reads. Since we do (~3,000 reads, i.e., coverage of ~500X), the assembly should be trivial: the genome is 48.8 kb and we have some reads of 20kb. We expect only one contig!
 
-We assemble lambda phage using the 3,068 2D reads (cca 500x). 1D reads are in substantially worse quality, so we would like to avoid using them if we have enough 2D reads. Since we do, the assembly should be trivial: The genome is 48.8kbp and we have some reads of 20kb! We expect only one contig!
+#### Canu
+![To do](img/wrench-and-hammer.png) Choose the appropriate parameters to run [Canu](http://canu.readthedocs.io/en/latest/commands/canu.html):
+```
+usage: canu -p <assembly-prefix>    # use a specified prefix to name canu output files
+            -d <assembly-directory> # use a specified prefix for output directories
+            genomeSize=<number>     # expected genome size
+   				  useGrid=false           # disables automatic submission to cluster
+            -nanopore-raw           # specifies that ONT MinION data are used
+            <data in fastq format>
+```
 
-**Canu**
-
+Put the full command in a script and submit it using bsub:
 ```sh
 module add UHTS/Assembler/canu/1.3;
-``` 
-
-![To do](img/wrench-and-hammer.png) Chose appropriate parameters:
-
-```
-parameters:	
-				-p : use specified prefix to name canu output files
-				-d : use specified prefix for output directories 
-				-errorRate : (optional) specifies expected error of reads.
-				-genomeSize : expected genome size
-				-nanopore-raw : specifies ONT MinION data 
-				-useGrid=false : disables automatic submission to cluster
+bsub < minion_assembly_canu.sh
 ```
 
-![To do](img/wrench-and-hammer.png) and run the assembly in the directory with extracted MinION 2D reads.
+<!--
+bsub -q priority -o minion_canu.out -e minion_canu.err -J minion_canu 'canu -p lambda -d lambda_minion/canu/ genomeSize=49k -nanopore-raw lambda_minion/all_reads.fastq.gz useGrid=false'
+-->
 
-```sh
-bsub -n 4 -q priority 'canu -p lambda -d <name_of_folder_for_output> errorRate=<error_rate> genomeSize=<genome_size> -nanopore-raw <reads_name> -useGrid=false -maxThreads=4 &> canu_minion_lambda.log'
-```
-
-The output is a directory containing several files. The most interesting ones are:
+The output directory contains many files. The most interesting ones are:
 - *.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
 - *.trimmedReads.fastq : file containing the sequences after correction and final trimming
 - *.layout : file containing informations about read inclusion in the final assembly
 - *.gfa : file containing the assembly graph by Canu
 - *.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
 
-![Question](img/round-help-button.png) How many contigs were produced? [1]
+![Question](img/round-help-button.png) How many contigs were produced? Does the total size seem to match your expectations?
+<!--
+Answer: 1, yes
+->
 
-**Miniasm**
+![Warning](img/warning.png)
+During our tests, the assembly did not always work. Sometimes the job was killed by the cluster, please check carefully the standard output and error files. We think that the memory requirement of Canu might be too big for some machines of the cluster. If this happens to you, rerun the job using the queue `dee-hugemem` instead of the queue `priority`. It night be useful to increase the amount of memory requested with the options `-v 20000000 -R "rusage[swp=20000]"` and `-M 10000000 -R "rusage[mem=10000]"`. If this still does not work, you can consult a successfull run that we pre-computed in the folder [...] 
 
+**TO DO (see `/scratch/beegfs/monthly/jroux/tp_long_reads/lambda_minion/canu/`) + check that submission on this queue works with student accounts**.
+
+<!--
+bsub -q dee-hugemem -o minion_canu_hugemem.out -e minion_canu_hugemem.err -J minion_canu_hugemem -v 20000000 -R "rusage[swp=20000]" -M 10000000 -R "rusage[mem=10000]" 'canu -p lambda -d lambda_minion/canu/ genomeSize=49k -nanopore-raw lambda_minion/all_reads.fastq.gz useGrid=false'
+-->
+
+#### Bonus: Miniasm
+![To do](img/wrench-and-hammer.png) You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
+
+```sh
+minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> | gzip -9 > <overlaps.gz>
+```
+
+<!--
+bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm 'mkdir lambda_minion/miniasm/; minimap -S -w 5 -L 100 -m 0 lambda_minion/all_reads.fastq.gz lambda_minion/all_reads.fastq.gz | gzip -9 > lambda_minion/miniasm/overlaps.gz'
+-->
+
+Then, to perform the assembly using `miniasm`:
+```sh
+miniasm -f <reads.fq> <overlaps.gz> > <contigs.gfa>
+## convert .gfa to .fasta
+awk '/^S/{print ">"$2"\n"$3}' <contigs.gfa> | fold > <contigs.fa>
+```
+
+<!--
+bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm 'miniasm -f lambda_minion/all_reads.fastq.gz lambda_minion/miniasm/overlaps.gz > lambda_minion/miniasm/contigs.gfa'
+awk '/^S/{print ">"$2"\n"$3}' lambda_minion/miniasm/contigs.gfa | fold > lambda_minion/miniasm/contigs.fa
+-->
+
+Put these commands in a script and submit it using bsub:
 ```sh
 module add UHTS/Analysis/minimap/0.2.r124.dirty;
 module add UHTS/Analysis/miniasm/0.2.r137.dirty;
+bsub < minion_assembly_miniasm.sh
 ```
 
-![To do](img/wrench-and-hammer.png) Compute overlaps of reads using `minimap`
+![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes corresponds to the number of nucleotides, newline characters and characters in headers. This is useful to roughly estimate the length of an assembly.
 
-```sh
-bsub -q priority -n 4 'minimap -Sw5 -L100 -m0 -t4 <reads.fq> <reads.fq> | gzip -1 > <overlaps.paf.gz>'
-```
-
-![To do](img/wrench-and-hammer.png) Perform an assembly using `miniasm`.
-
-```sh
-bsub -q priority 'miniasm -f <reads.fq> <overlaps.paf.gz> > Lambda_contigs.gfa'
-```
-
-![To do](img/wrench-and-hammer.png) Convert `.gfa` to `.fasta`.
-
-```sh
-awk '/^S/{print ">"$2"\n"$3}' Lambda_contigs.gfa | fold > Lambda_contigs.fa
-```
-
-![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes is number of nucleotides, newlines and letters in all headers inside. Therefire you can roughly estimate the length of the assembly from the size of files.
-
-![help](img/help.png) If you are lost, you can get both assemblies of MinION and PacBio reads by executing
+![help](img/help.png) If you are lost, you can get the assembly of MinION reads by executing:
 ```sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
 
 ### PacBio RS II
 
-One SMRT cell produces yield between 0.5-1gbp. What roughly correspond to 10,000 to 20,000x coverage of lambda phage genome. As you can imagine, it is a bit overkill. We can a decrease a computational load very much by assembling a subset of a few thousand reads only.
+One SMRT cell produces between 0.5 and 1 gb. This roughly correspond to a 10,000x coverage of the lambda phage genome which is a bit of an overkill. We can decrease the computational load by use a subset of a few thousand reads only for the assembly.
 
 ![To do](img/wrench-and-hammer.png) Go to directory with extracted PacBio reads and take a subset of the first 3,000 reads.
 
@@ -512,6 +529,8 @@ https://github.com/sib-swiss/2016-07-05-longreads-bern
 * TO DO: cut lines of code that are too long
 
 * TO DO: git pull of scratch/beegfs/monthly/SIB_long_read_workshop/
+
+* TO DO: remove gzip commands?
 
 ![Question](img/round-help-button.png)
 ![Tip](img/elemental-tip.png)
