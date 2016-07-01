@@ -58,11 +58,11 @@ In order to connect to the cluster and set up your working directory follow the 
 
 In a terminal, type ```ssh <username>@prd.vital-it.ch```. You will be prompted to input your user password (```<username>@prd.vital-it.ch's password:```). Type in your password (you will not see what you are typing) and press Enter.
 
-You are in! Jump to [Setting up your working directory](#Setting-up-your-working-directory).
+You are in! Jump to [Setting up your working directory](#setting-up-your-working-directory).
 
 ### For Windows users
 
-You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to [Setting up your working directory](#Setting-up-your-working-directory).
+You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to [Setting up your working directory](#setting-up-your-working-directory).
 
 If you do not have a ssh client, follow [these steps](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf). 
 
@@ -176,7 +176,7 @@ gzip -9 lambda_minion/all_reads.fastq
 ```
 
 ![Warning](img/warning.png)
-**Remember, that it is not allowed to launch your command on the frontal machine!** You need to write your `poretools` command in a bash script (called for example `minion_extract.sh`) that you will submit to the cluster with `bsub` (see [Submitting commands to the cluster](#Submitting-commands-to-the-cluster)):
+**Remember, that it is not allowed to launch your command on the frontal machine!** You need to write the above commands in a bash script (called for example `minion_extract.sh`) that you will submit to the cluster with `bsub` (see [Submitting commands to the cluster](#submitting-commands-to-the-cluster)):
 ```sh
 module add UHTS/Analysis/poretools/0.5.1
 bsub < minion_extract.sh
@@ -222,29 +222,29 @@ Answer: 1
 -->
 
 ![To do](img/wrench-and-hammer.png)
-Extract PacBio subreads using `bash5tools.py` from `pbh5tools`.
+Extract PacBio subreads using `bash5tools.py` from `pbh5tools`. Again, refer to the [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). The commands will look like this:
+```sh
+bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq
+## compress this file and move it the PacBio data folder
+gzip -9 [prefix.fastq]
+mv [prefix.fastq.gz] lambda_RSII/
+```
 
+Put the full command in a script and submit it using bsub:
 ```sh
 module add UHTS/PacBio/pbh5tools/0.8.0
-bsub -q priority -o RSII_extract.out -e RSII_extract.err -J RSII_extract 'bash5tools.py <file.bas.h5> --outFilePrefix <prefix_for_extracted_reads> --readType subreads --outType fastq'
+bsub < pacbio_extract.sh
 ```
-**TO DO: should we give the full command? Or give hints to the useful options? I think it's better that they refer to the doc themslves**
+<!--
+bsub -q priority -o RSII_extract.out -e RSII_extract.err -J RSII_extract 'bash5tools.py lambda_RSII/raw_reads/m140715_200214_42182_c100661412550000001823125411271451_s1_p0.bas.h5 --outFilePrefix pacbio --readType subreads --outType fastq'
+-->
 
 ![Question](img/round-help-button.png)
 How many subreads were produced? 
 <!--
-```sh
 wc -l <prefix_for_extracted_reads>.fastq   # reads in fastq = number of lines / 4
-```
-[132269]
+Answer: 132269
 -->
-
-We will compress this file and move it the PacBio data folder:
-```sh
-gzip -9 [fastq file]; mv [fastq.gz file] lambda_RSII/
-```
-**TO DO: use bsub**
-**TO DO: is there a way to do this directly with bash5tools.py?**
 
 ![help](img/help.png) If you are lost, you can get extracted PacBio reads by executing
 ```sh
