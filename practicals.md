@@ -58,11 +58,11 @@ In order to connect to the cluster and set up your working directory follow the 
 
 In a terminal, type ```ssh <username>@prd.vital-it.ch```. You will be prompted to input your user password (```<username>@prd.vital-it.ch's password:```). Type in your password (you will not see what you are typing) and press Enter.
 
-You are in! Jump to [Setting up your working directory].
+You are in! Jump to [Setting up your working directory](#Setting-up-your-working-directory).
 
 ### For Windows users
 
-You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to [Setting up your working directory].
+You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to [Setting up your working directory](#Setting-up-your-working-directory).
 
 If you do not have a ssh client, follow [these steps](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf). 
 
@@ -168,16 +168,15 @@ Choose one file at random in the ```fastq/2D``` folder and compare the quality s
 -->
 
 ![To do](img/wrench-and-hammer.png)
-You will convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `poretools fastq` utility. To find out about options to use, please refer to the [documentation](http://poretools.readthedocs.io/en/latest/content/examples.html#poretools-fastq), or type `poretools fastq -h`. For now, we are interested in extracting all types of reads (template, complement and 2D, so the option `--type all` should be used). Be careful that the `.fastq` file is written in the standard output, so you need to redirect the standard output to a file using `>`, for example: 
+You will convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `poretools fastq` utility. To find out which options to use, please refer to the [documentation](http://poretools.readthedocs.io/en/latest/content/examples.html#poretools-fastq), or type `poretools fastq -h`. For now, we are interested in extracting all types of reads (template, complement and 2D), so check out the option `--type`. Be careful, the output `.fastq` file is written in the standard output, so you need to save the standard output to a file using `>`. For example: 
 ``` sh
 poretools fastq [...] > lambda_minion/all_reads.fastq
-## Or, even better:
-poretools fastq [...] | gzip -9 > lambda_minion/all_reads.fastq.gz
+## And even better you can add a step to compress the output file:
+gzip -9 lambda_minion/all_reads.fastq
 ```
-**TO DO: the output is still written in the .out file. How to deactivate this?**
 
 ![Warning](img/warning.png)
-Remember, that it is not allowed to launch your command on the frontal machine. You need to write your `poretools` command in a bash script (called for example `minion_extract.sh`) that you will submit to the cluster with `bsub` (see [Submitting commands to the cluster]):
+**Remember, that it is not allowed to launch your command on the frontal machine!** You need to write your `poretools` command in a bash script (called for example `minion_extract.sh`) that you will submit to the cluster with `bsub` (see [Submitting commands to the cluster](#Submitting-commands-to-the-cluster)):
 ```sh
 module add UHTS/Analysis/poretools/0.5.1
 bsub < minion_extract.sh
@@ -188,21 +187,26 @@ bsub -q priority -o minion_extract.out -e minion_extract.err -J minion_extract '
 For 2D reads only add: --type 2D 
 -->
 
-![Question](round-help-button.png)
-Have a look at the `.fastq` file created, for example using `less`. Do you identify which reads are 2D, template or complement reads? 
+![Question](img/round-help-button.png)
+Have a look at the `.fastq` file created, using `less` or `nano`. Looking at header lines (starting with a `@`), do you identify which reads are 2D, template or complement reads? Do you identify which lines correspond to the quality scores (their header is a `+` sign).
 
-At the beginning of the sequence header of a 2D read (starting with a `@`), you can find a hash looking something like this: `ddf8535b-539b-45b8-8203-657eefc94bda`. Searching for this pattern in the file allows you to find the template and complement reads used to produce this 2D read.
+Focus on a 2D read chosen at random. Look for the corresponding template and complement reads, which should be the next ones in the file (or you can search for the unique hash at the beginning of the header, which is common between 2D, template and complement reads).
 
-![Question](round-help-button.png)
+![Question](img/round-help-button.png)
 Do the quality scores seem to be improved in 2D reads? You can refer to [this wikipedia page](http://en.wikipedia.org/wiki/FASTQ_format#Encoding) for help on the PHRED quality scores in `.fastq` files. 
 
 ![Tip](img/elemental-tip.png)
-For basic quality control of the reads, you can also launch the `fastqc` software (widely used for Illumina data) on this `fastq.gz` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
+We will not do this today, but for basic quality control of the reads, you can also launch the `fastqc` software (widely used for Illumina data) on this `fastq` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
 
 ![help](img/help.png) If you are lost, you can get extracted MinION reads by executing the following script. While the script is running, have a look at it to understand what is done.
 ```sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_MinION.sh
 ```
+<!--
+TO DO? 
+- compress fastq file
+- extract all types of reads
+-->
 
 ### Extraction of PacBio RS II reads
 First, create a working directory for raw reads and create links to the raw sequencing files.
@@ -214,7 +218,7 @@ ln -s /scratch/beegfs/monthly/SIB_long_read_workshop/RSII_lambda_reads/*.h5 lamb
 ![Question](img/round-help-button.png)
 How many SMRT cells do we have? 
 <!--
-[1]
+Answer: 1
 -->
 
 ![To do](img/wrench-and-hammer.png)
@@ -507,8 +511,11 @@ https://github.com/sib-swiss/2016-07-05-longreads-bern
 
 * TO DO: cut lines of code that are too long
 
+* TO DO: git pull of scratch/beegfs/monthly/SIB_long_read_workshop/
+
 ![Question](img/round-help-button.png)
 ![Tip](img/elemental-tip.png)
 ![To do](img/wrench-and-hammer.png)
 ![Warning](img/warning.png)
 -->
+
