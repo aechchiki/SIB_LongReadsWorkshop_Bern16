@@ -122,12 +122,6 @@ The PacBio RS II system produces three `bax.h5` files and a `bas.h5` per SMRT ce
 ### Tools
 All used tools are already installed on Vital-IT. Before the first use, you will just need to load the package.
 
-<!--
-**NanoOK** allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. Note: this software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
-
-TO DO: maybe this paragrpah needs to be moved down to the mapping part
--->
-
 **Poretools** is a toolkit for working with sequencing data from MinION, for the purposes of quality control and downstream analysis. It operates directly on the native `.fast5` format and provides format conversion utilities and data exploration tools. Software usage is detailed in the [documentation](http://poretools.readthedocs.io/en/latest/).
 
 **pbh5tools** is a set of python scripts to extract `.fasta` and `.fastq` from `bas.h5` and `bax.h5` files. These scripts allow filtering based on error rate, read length and read type. Source code is available on [GitHub](https://github.com/PacificBiosciences/pbh5tools) and software usage is detailed in [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). 
@@ -198,6 +192,7 @@ Do the quality scores seem to be improved in 2D reads? You can refer to [this wi
 <!--
 TO DO? 
 Poretools stats
+Would be nice to know what we are dealing with
 -->
 
 ![Tip](img/elemental-tip.png)
@@ -233,7 +228,6 @@ bash5tools.py <file.bas.h5> --outFilePrefix lambda_RSII/<prefix_for_extracted_re
 ## compress the output file
 gzip -9 lambda_RSII/[prefix.fastq]
 ```
-
 Put the full command in a script and submit it using bsub:
 ```sh
 module add UHTS/PacBio/pbh5tools/0.8.0
@@ -259,16 +253,12 @@ bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_RSII.
 Genome assembly with long reads is, just like the established assembly with short-reads, based on graph theory. But string graphs are used instead of De Brujin graphs, and instead of kmer decomposition, the graph of reads (nodes) and their overlaps (edges) is constructed.
 
 ### Tools
-We will use Canu and Miniasm for assembly using both MinION and PacBio reads, then we check the assembly quality using the report provided by Quast. 
 
 #### Canu
 Canu is an assembler for noisy long-reads sequences. It is a fork of Celera with added modules for error correction and trimming of reads. Canu was designed for both MinION and PacBio data, and is one of the two leading assemblers for longs reads (together with Falcon). Canu has many parameters, which are not discussed on this workshop, but many details are given in the [manual](http://canu.readthedocs.io/en/stable/).
 
 #### Miniasm
 Miniam is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for a final assembly, another assembler should be considered. As a first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
-
-#### Quast
-Quast is a tool to evaluate genome assemblies. It provides an exaustive report providing metrics on contigs. It can also be used for comparison between assemblies, or to compare a *de novo* assembly to a reference genome. 
 
 ### MinION
 We will assemble the lambda phage genome using only the 2D reads. 1D reads are of substantially lower quality, so we would like to avoid using them if we have enough 2D reads. Since we do (~3,000 reads, i.e., coverage of ~500X), the assembly should be trivial: the genome is 48.8 kb and we have some reads of 20kb. We expect only one contig!
@@ -315,6 +305,9 @@ During our tests, the assembly did not always work. Sometimes the job was killed
 bsub -q dee-hugemem -o minion_canu_hugemem.out -e minion_canu_hugemem.err -J minion_canu_hugemem -v 20000000 -R "rusage[swp=20000]" -M 10000000 -R "rusage[mem=10000]" 'canu -p lambda -d lambda_minion/canu/ genomeSize=49k -nanopore-raw lambda_minion/all_reads.fastq.gz useGrid=false'
 -->
 
+<!-- 
+For now I removed this part since it is done for pacbio below
+
 #### Bonus: Miniasm
 ![To do](img/wrench-and-hammer.png) You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
 
@@ -352,109 +345,230 @@ bsub < minion_assembly_miniasm.sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
 
-**TO DO? Why is miniasm assembly only 29kb? Maybe we should only use miniasm wiht pacbio (since canu doesn't give an assembly of the rigth size?)**
+**Miniasm assembly of MinION reads is only 29kb -> only use miniasm with pacbio (since canu doesn't give an assembly of the rigth size)**
+-->
 
 ### PacBio RS II
+One PacBio RS II SMRT cell produces between 0.5 and 1 gb. This roughly correspond to a 10,000x coverage of the lambda phage genome which is clearly an overkill. We can decrease the computational load by using a subset of only a few thousand reads for the assembly.
 
-One SMRT cell produces between 0.5 and 1 gb. This roughly correspond to a 10,000x coverage of the lambda phage genome which is a bit of an overkill. We can decrease the computational load by use a subset of a few thousand reads only for the assembly.
-
-![To do](img/wrench-and-hammer.png) Go to directory with extracted PacBio reads and take a subset of the first 3,000 reads.
-
+![To do](img/wrench-and-hammer.png) 
+Go to the directory including the extracted PacBio reads and extract a subset of the first 3,000 reads.
 ```sh
-head -12000 RSII_reads.fastq > RSII_reads_subset.fastq
+zcat RSII_reads.fastq.gz | head -12000 | gzip -9 > RSII_reads_subset.fastq
 ```
 
-The assembly is now analogical to the assembly of MinION data
+The assembly step is now analogous to the assembly of MinION data
 
-![To do](img/wrench-and-hammer.png) Modify the command performing `Canu` assembly for PacBio data. Change the type of input reads to `-pacbio-raw`, name of the input file and the name of output name and perform the assembly.
+![To do](img/wrench-and-hammer.png) Modify the command performing `Canu` assembly for PacBio data. Change the type of input reads to `-pacbio-raw`, the name of the input file and the name of output folder, and launch the assembly.
 
+<!--
+module add UHTS/Assembler/canu/1.3;
+bsub -q dee-hugemem -o RSII_canu_hugemem.out -e RSII_canu_hugemem.err -J RSII_canu_hugemem -v 20000000 -R "rusage[swp=20000]" -M 10000000 -R "rusage[mem=10000]" 'canu -p lambda -d lambda_RSII/canu/ genomeSize=49k -pacbio-raw lambda_RSII/RSII_reads_subset.fastq useGrid=false'
+Gives one contig of length 58.7kb
 
-![To do](img/wrench-and-hammer.png) Perform assembly of PacBio data using miniasm as well.
+But 3000 subreads do not correspond to 3000 unique sequences... Maybe we should take more subreads as input?
+awk 'NR%4==1' RSII_reads_subset.fastq | cut -f2 -d"/" | sort | uniq | wc -l ## 1735
+head -n 22000 lambda_RSII/pacbio.fastq | awk 'NR%4==1' | cut -f2 -d"/" | sort | uniq | wc -l ## 3156
+Still contig of 59kb :(
 
-![Question](img/round-help-button.png) What is are the lengths of all four assemblies? Is there anything weird going on? [yes, PacBio reads are not assembled well.]
+head -40000 lambda_RSII/pacbio.fastq | gzip -9 > lambda_RSII/RSII_reads_subset.fastq.gz
+Still one contig, but 67.4kb :(
+-->
 
+![Question](img/round-help-button.png)
+What is the length of the resulting assembly? Is there anything weird going on? 
 
-![help](img/help.png) If you are lost, you can get both assemblies of MinION and PacBio reads by executing
+<!--
+yes, PacBio reads are not assembled well. Maybe too much coverage? Quality of the data?
+-->
+
+#### Bonus: Miniasm
+Since the assembly with Canu does not seem to be successful, we will try a different assembler, `miniasm`.
+
+![To do](img/wrench-and-hammer.png)
+You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
+
+```sh
+minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> | gzip -9 > <overlaps.gz>
+```
+<!--
+module add UHTS/Analysis/minimap/0.2.r124.dirty;
+bsub -q priority -o RSII_miniasm.out -e RSII_miniasm.err -J RSII_miniasm 'mkdir lambda_RSII/miniasm/; minimap -S -w 5 -L 100 -m 0 lambda_RSII/RSII_reads_subset.fastq lambda_RSII/RSII_reads_subset.fastq | gzip -9 > lambda_RSII/miniasm/overlaps.gz'
+-->
+
+![To do](img/wrench-and-hammer.png)
+Then, to perform the assembly using `miniasm`:
+```sh
+miniasm -f <reads.fq> <overlaps.gz> > <contigs.gfa>
+## convert .gfa to .fasta
+awk '/^S/{print ">"$2"\n"$3}' <contigs.gfa> | fold > <contigs.fa>
+```
+
+<!--
+module add UHTS/Analysis/miniasm/0.2.r137.dirty;
+bsub -q priority -o RSII_miniasm.out -e RSII_miniasm.err -J RSII_miniasm 'miniasm -f lambda_RSII/RSII_reads_subset.fastq lambda_RSII/miniasm/overlaps.gz > lambda_RSII/miniasm/contigs.gfa'
+awk '/^S/{print ">"$2"\n"$3}' lambda_RSII/miniasm/contigs.gfa | fold > lambda_RSII/miniasm/contigs.fa
+-->
+
+Put these commands in a script and submit it using bsub:
+```sh
+module add UHTS/Analysis/minimap/0.2.r124.dirty;
+module add UHTS/Analysis/miniasm/0.2.r137.dirty;
+bsub < RSII_assembly_miniasm.sh
+```
+![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes corresponds to the number of nucleotides, newline characters and characters in headers. This is useful to roughly estimate the length of an assembly. Ortherwise you can remove the header with tail and count the number of nucleotides: `tail -n+2 lambda_RSII/miniasm/contigs.fa | wc -m`
+
+![Question](img/round-help-button.png)
+What do you think about the length of this assembly?
+
+![help](img/help.png) If you are lost, you can get the assembly based on PacBio reads by executing:
 ```sh
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_RSII_Assembly.sh
 ```
 
-***
+## 3. Quality of assemblies
 
-## 3. Quality of assembly
-
-`Canu` produces a `.html` report for every performed step. You can find there amounts of reads after correction, filtering, etc. However, miniasm, does not therefore we use `Quast` for stats of all smeblies to get unified format. Then we will map assemblies to reference to find amount of expected differences.
+`Canu` produces a `.html` report for every performed step. You can find there the amount of reads after correction, filtering, etc. Miniasm, however does not provide such a report, therefore we will use `Quast` to estimate basic statistics of the all assemblies in a comparable format. Then we will map the assemblies to the lambda phage reference genome to inspect their quality.
 
 ### Tools
 
-**Quast** is a quality assessment tool for genome assemblies. Running Quast on an assembly provides a detailed report about the statistics of the assembly, in pdf format.
+#### Quast
+Quast is a tool to evaluate genome assemblies. It provides a PDF report providing metrics on contigs. It can also be used for comparison between assemblies, or to compare a *de novo* assembly to a reference genome. Here are the [paper](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/), the [GitHub page](https://github.com/ablab/quast) and the [manual](http://quast.bioinf.spbau.ru/manual). 
 
-* Link to the paper: http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/
-* GitHub page: https://github.com/ablab/quast
-* Quast manual: http://quast.bioinf.spbau.ru/manual
+**TO DO: add MUMmer**
+[Documentation](http://mummer.sourceforge.net/manual/)
 
-The `Quast` module is installed on vital-IT. You can access the software by loading the module: `module add UHTS/Quality_control/quast/4.1`. 
-
-### Usage?
-
-We will use the information in *.contigs.fasta to generate the assembly report.
-
+### Downloading the lambda phage reference genome
 ```sh
-# load the quality assessment module 
-module add UHTS/Quality_control/quast/4.1
-# generate the report 
-quast.py -R <path/to/reference_genome> *.contigs.fasta
+mkdir reference/
+cd reference/
+wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/Enterobacteria_phage_lambda_uid14204/NC_001416.fna
+ln -s NC_001416.fna lambda_ref_genome.fa # a clearer name
 ```
 
-The output is a directory, typically `quast_results/<date_of_launch>` containing several files. The most interesting for us is the report in pdf format. We can copy it to the local machine using `scp`. 
+### Running Quast
+The command in your submission script should look something like this:
+```sh
+quast.py -R <path to reference genome> <path to Canu MinION assembly> <path to Canu PacBio assembly> <path to Miniasm PacBio assembly> 
+```
 
-TODO: interesting questions about the report?
+![To do](img/wrench-and-hammer.png)
+You can submit your script after loading the appropriate module: 
+```sh
+module add UHTS/Quality_control/quast/4.1
+bsub < quast.sh
+```
 
+<!--
+bsub -q priority -o quast.out -e quast.err -J quast 'quast.py -R reference/lambda_ref_genome.fa lambda_minion/canu/lambda.contigs.fasta lambda_RSII/canu/lambda.contigs.fasta lambda_RSII/miniasm/contigs.fa'
 
-TODO: questions on comparison of the assemblies 
+bsub -q priority -o quast.out -e quast.err -J quast 'quast.py -R reference/lambda_ref_genome.fa lambda_minion/canu/lambda.contigs.fasta lambda_minion/miniasm/contigs.fa lambda_RSII/canu/lambda.contigs.fasta lambda_RSII/miniasm/contigs.fa'
+-->
 
-
-***TO DO: Emmanuel has done a nanook analysis on these reads. transfer the PDF to your laptop using `scp`. Couldn't do it because permissions not set up correctly (email sent to Emmanuel).***
-
-***TO DO: Emmanuel told me the DNA fragments for PacBio were 10kb long. Is that made through sonication or size-selection?***
+The output is a directory, typically `quast_results/<date_of_launch>`, containing several files including a report in PDF format. Copy it to your local machine using `scp`. 
 
 ![Question](img/round-help-button.png)
-Have a look at the `nanoOK` report for these reads. How does it compare to the report made on MinION reads?
+What do you notice in this report? What did go wrong with the PacBio Canu assembly? Is the Miniasm assembly better? Compare the Canu assemblies made wiht both MinION and PacBio data: hwo does the error and indel rates compare?
 
+<!--
+Answers: 
+pacbio canu assembly has a duplicated part (duplication ratio = 1.2)
+Miniasm assembly worse: not even mapping to ref !!!
+Minion has a lot more errors and indels!!!
+-->
 
+### Bonus: getting further
+It would be interesting to know more precisely what is going on with PacBio assemblies. 
+* The software `Mauve` (see [website](http://darlinglab.org/mauve/user-guide/introduction.html)) could be interesting, but it is GUI only, so you need to install it on your laptop.  
+* It is probably a good idea to generate a dot plot to visualize and compare assemblies. This can be done with the `MUMmer` software. The command below will find all maximal unique matches (-mum) between the assemblies on both the forward and reverse strands (-b) and report all the match positions relative to the forward strand (-c). The output lists all of the matches between the two input sequences.
 
-![help](img/help.png) If you are lost, you can get all quality stats of all assemblies by executing
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/3_Assembly_quality.sh
+mkdir mummer/
+mummer -mum -b -c <assembly_1.fa> <assembly_2.fa> > mummer/<assembly_1_vs_2.mums>
 ```
 
-***
+<!--
+mkdir mummer
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummer -mum -b -c reference/lambda_ref_genome.fa lambda_minion/canu/lambda.contigs.fasta > mummer/lambda_minion_canu.mums'
 
-## 4. Mapping to a assembled genome
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummer -mum -b -c reference/lambda_ref_genome.fa lambda_minion/miniasm/contigs.fa > mummer/lambda_minion_miniasm.mums'
+
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummer -mum -b -c reference/lambda_ref_genome.fa lambda_RSII/canu/lambda.contigs.fasta > mummer/lambda_RSII_canu.mums'
+
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummer -mum -b -c reference/lambda_ref_genome.fa lambda_RSII/miniasm/contigs.fa > mummer/lambda_RSII_miniasm.mums'
+-->
+
+To generate a dotplot of all the matches between two sequences:
+```sh
+mummerplot -postscript -p <assembly_1_vs_2> <assembly_1_vs_2.mums>
+```
+<!--
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummerplot -postscript -p mummer/lambda_minion_canu mummer/lambda_minion_canu.mums'
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummerplot -postscript -p mummer/lambda_minion_miniasm mummer/lambda_minion_miniasm.mums'
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummerplot -postscript -p mummer/lambda_RSII_canu mummer/lambda_RSII_canu.mums'
+bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummerplot -postscript -p mummer/lambda_RSII_miniasm mummer/lambda_RSII_miniasm.mums'
+-->
+
+![To do](img/wrench-and-hammer.png)
+Write a script to perform the comparison of all assemblies to the reference genome. You can submit your script after loading the appropriate module: 
+```sh
+module add UHTS/Analysis/MUMmer/3.23;
+bsub < mummer.sh
+```
+
+![Question](img/round-help-button.png)
+Download the postscript dot plots to your computer with `scp`. What do you think of the dot plots? Check this [cheat sheet](http://mummer.sourceforge.net/manual/AlignmentTypes.pdf) for interpreting dot plots. Is the problem with the PacBio Canu assembly really important? Can you guess from this plot what went wrong when passing the Miniasm assembly through Quast?
+
+<!--
+Answers: Canu pacbio: overlap between beginning and end of assembly: not so bad!
+Miniasm quite bad at correcting errors: probably why did not map with Quast
+
+TO DO?
+![help](img/help.png)
+If you are lost, you can get all quality stats of all assemblies by executing:
+```sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/_Assembly_quality.sh
+```
+-->
+
+## 4. Bonus: mapping reads to a reference genome
 
 ### Tools
 
-You will download the lambda phage reference genome and map the reads to it using the `LAST` aligner. To map to a reference genome, the reference sequence first needs to be indexed.
+#### NanoOK
+This tool allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. This software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in the [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
+
+#### LAST
+LAST finds similar regions between sequences (local alignment). It is faster than BLAST and can handle largeer datasets. See the project [website](http://last.cbrc.jp/).
 
 ### MinION
 
+To map the reads to the reference genome of the lambda phage using the `LAST` aligner, the reference sequence first needs to be indexed. The `-Q 0` tells LAST to expect a fasta file.
+
 ```sh
-mkdir -p lambda_minion/reference/
-cd lambda_minion/reference/
-wget ftp://ftp.ncbi.nlm.nih.gov/genomes/Viruses/Enterobacteria_phage_lambda_uid14204/NC_001416.fna
-mv NC_001416.fna lambda_ref_genome.fa # we rename the file to a clearer name
+cd reference/
+module add UHTS/Analysis/NanoOK/0.72
 lastdb -Q 0 lambda_ref_genome lambda_ref_genome.fa
-cd ../../
+cd ..
 ```
-![Tip](img/elemental-tip.png)
-The size of the indexed sequences can be visualized in the `.sizes` file.
+<!--
+This is very fast, so probably no need to bsub...
+-->
 
 ![To do](img/wrench-and-hammer.png)
-Now launch the alignment with `LAST` (default aligner) using the `nanook align` utility.
+Now launch the alignment with `LAST` (default aligner) using the `nanook align` utility. NanoOK expects a fasta file for each read, in a folder called `fasta/`. The commands in your submission script should look like this:
 
 ```sh
-nanook align -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
+mkdir lambda_minion/
+nanook_split_fasta -i input.fasta -o outputdir
+
+nanook align -s lambda_minion -r reference/lambda_ref_genome.fa
 ```
+
+
+bsub -q priority -o minion_extract.out -e minion_extract.err -R "rusage[mem=4096]" 'nanook extract [...]'
+
+
 
 ![Question](img/round-help-button.png)
 What directories have been created? What do they contain? Look at one randomly chosen alignment file. What is striking?
@@ -465,17 +579,13 @@ It is possible to specify to `nanook align` the alignment parameters to be used 
 ### Bonus (or at home)
 You can try to align reads with other aligners. For example to use `BWA-MEM`, you first need to load the corresponding module on vital-IT (`module add UHTS/Aligner/bwa/0.7.13`), create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
 
+<!-- 
+TO DO?
 ![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
 ```sh
 bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
 ```
-
-### PacBio RS II
-
-![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
-```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
-```
+-->
 
 ### Statistics and QC report
 ![To do](img/wrench-and-hammer.png)
@@ -507,10 +617,17 @@ Take some time to read and understand the report. Here are a few questions that 
 
 ### PacBio RS II
 
-![help](img/help.png) If you are lost, you can perform a quality control report of mapping by executing
+### PacBio RS II
+It is quite easy to redo the above steps with PacBio data. Do it if you have time ;-) 
+
+<!-- 
+TO DO?
+![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_mapping_qc_report.sh
+bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
 ```
+-->
+
 
 <!--
 TO DOs
@@ -534,6 +651,10 @@ https://github.com/sib-swiss/2016-07-05-longreads-bern
 * TO DO: git pull of scratch/beegfs/monthly/SIB_long_read_workshop/
 
 * TO DO: remove gzip commands?
+
+* TO DO: change "we to "you"
+
+* TO DO: test dee-hugemem with student account
 
 ![Question](img/round-help-button.png)
 ![Tip](img/elemental-tip.png)
