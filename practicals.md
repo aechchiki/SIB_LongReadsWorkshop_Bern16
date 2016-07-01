@@ -351,6 +351,8 @@ bsub < minion_assembly_miniasm.sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
 
+**TO DO? Only use miniasm wiht acbio (since canu doesn't give an asembly of the rigth size?)**
+
 ### PacBio RS II
 
 One SMRT cell produces between 0.5 and 1 gb. This roughly correspond to a 10,000x coverage of the lambda phage genome which is a bit of an overkill. We can decrease the computational load by use a subset of a few thousand reads only for the assembly.
