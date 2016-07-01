@@ -351,7 +351,7 @@ bsub < minion_assembly_miniasm.sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
 ```
 
-**TO DO? Only use miniasm wiht acbio (since canu doesn't give an asembly of the rigth size?)**
+**TO DO? Why is miniasm assembly only 29kb? Maybe we should only use miniasm wiht pacbio (since canu doesn't give an assembly of the rigth size?)**
 
 ### PacBio RS II
 
