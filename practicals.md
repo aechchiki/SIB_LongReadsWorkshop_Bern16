@@ -93,16 +93,10 @@ bsub < script.sh
 ```
 Please have a look at [this short tutorial](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it-usage.md) to help you write such a script yourself, with the `Nano` text editor. To save you some typing, a skeleton of a submission script can be found [here](script/skeleton.sh) ;)  
 
-<!--
-TO DO?
-* Memory usage? `-M / -R`
-* Make them download a skeleton of a submission script, to save time in writting it?
--->
-
 ## 1. Read extraction
 
 ### Formats
-The output of MinION and PacBio RS II are stored in Hierarchical Data Format, that is basically an archive format (like `.zip` or `.tar`), but allowing a very quick access to its content (you can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). Those files include all details about reads and basecalling. What we need will need for this practical are just the sequences and their qualities, that can be stored in a simple `.fastq`.
+The output of MinION and PacBio RS II are stored in Hierarchical Data Format, that is basically an archive format (such as `.zip` or `.tar`), but allowing a very quick access to its content (you can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). Those files include all details about reads and basecalling. What we need will need for this practical are just the sequences and their qualities, that can be stored in a simple `.fastq`.
 
 ![Tip](img/elemental-tip.png)
 The files saved in Hierarchical Data Format can be explored using HDF5 command-line tools:
@@ -190,7 +184,7 @@ Do the quality scores seem to be improved in 2D reads? You can refer to [this wi
 <!--
 TO DO? 
 Poretools stats
-Would be nice to know what we are dealing with
+Would be nice to know what we are dealing with. This is done quitelate (NanoOK analysis) otherwise...
 -->
 
 ![Tip](img/elemental-tip.png)
@@ -201,7 +195,7 @@ We will not do this today, but for basic quality control of the reads, you can a
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/1_Extraction_MinION.sh
 ```
 <!--
-TO DO? 
+TO DO in backup script 
 - compress fastq file
 - extract all types of reads
 -->
@@ -295,16 +289,17 @@ Answer: 1, yes
 ->
 
 ![Warning](img/warning.png)
-During our tests, the assembly did not always work. Sometimes the job was killed by the cluster, please check carefully the standard output and error files. We think that the memory requirement of Canu might be too big for some machines of the cluster. If this happens to you, rerun the job using the queue `dee-hugemem` instead of the queue `priority`. It night be useful to increase the amount of memory requested with the options `-v 20000000 -R "rusage[swp=20000]"` and `-M 10000000 -R "rusage[mem=10000]"`. If this still does not work, you can consult a successfull run that we pre-computed in the folder [...] 
-
-**TO DO (see `/scratch/beegfs/monthly/jroux/tp_long_reads/lambda_minion/canu/`) + check that submission on this queue works with student accounts**.
+During our tests, the assembly did not always work. Sometimes the job was killed by the cluster, please check carefully the standard output and error files. We think that the memory requirement of Canu might be too big for some machines of the cluster. If this happens to you, rerun the job using the queue `dee-hugemem` instead of the queue `priority`. It night be useful to increase the amount of memory requested with the options `-v 20000000 -R "rusage[swp=20000]"` and `-M 10000000 -R "rusage[mem=10000]"`. If this still does not work, you can see a successful run that we pre-computed in the folder `/scratch/beegfs/monthly/jroux/tp_long_reads/lambda_minion/canu/`.
+<!--
+Copy this folderto SIB_long_reads folder on scratch
+-->
 
 <!--
 bsub -q dee-hugemem -o minion_canu_hugemem.out -e minion_canu_hugemem.err -J minion_canu_hugemem -v 20000000 -R "rusage[swp=20000]" -M 10000000 -R "rusage[mem=10000]" 'canu -p lambda -d lambda_minion/canu/ genomeSize=49k -nanopore-raw lambda_minion/all_reads.fastq.gz useGrid=false'
 -->
 
 <!-- 
-For now I removed this part since it is done for pacbio below
+I commented out the Miniasm assembly for MinIOn since it is done for pacbio below
 
 #### Bonus: Miniasm
 ![To do](img/wrench-and-hammer.png) You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
@@ -355,7 +350,7 @@ Go to the directory including the extracted PacBio reads and extract a subset of
 zcat RSII_reads.fastq.gz | head -12000 | gzip -9 > RSII_reads_subset.fastq
 ```
 
-The assembly step is now analogous to the assembly of MinION data
+The assembly step is now analogous to the assembly of MinION data. 
 
 ![To do](img/wrench-and-hammer.png) Modify the command performing `Canu` assembly for PacBio data. Change the type of input reads to `-pacbio-raw`, the name of the input file and the name of output folder, and launch the assembly.
 
@@ -433,8 +428,8 @@ bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_RSII_Assembly.sh
 #### Quast
 Quast is a tool to evaluate genome assemblies. It provides a PDF report providing metrics on contigs. It can also be used for comparison between assemblies, or to compare a *de novo* assembly to a reference genome. Here are the [paper](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3624806/), the [GitHub page](https://github.com/ablab/quast) and the [manual](http://quast.bioinf.spbau.ru/manual). 
 
-**TO DO: add MUMmer**
-[Documentation](http://mummer.sourceforge.net/manual/)
+#### MUMmer
+MUMmer is a software for rapidly aligning entire genomes, whether in complete or draft form. It can generate visualizations, such as dot plots. Here is the [documentation](http://mummer.sourceforge.net/manual/).
 
 ### Downloading the lambda phage reference genome
 ```sh
