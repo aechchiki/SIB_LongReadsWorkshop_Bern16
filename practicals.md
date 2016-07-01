@@ -91,7 +91,7 @@ Or, better, write your commands in a script and submit it with:
 ```sh
 bsub < script.sh
 ```
-Please have a look at [this short tutorial](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it-usage.md) to help you write such a script yourself, with the `Nano` text editor. To save you some typing, a skeleton of a submission script can be found [here](script/skeleton.sh) ;)  
+Please have a look at [this short tutorial](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it-usage.md) to help you write such a script yourself, with the `Nano` text editor. To save you some typing, a skeleton of a submission script can be found [here](scripts/skeleton.sh) ;)  
 
 ## 1. Read extraction
 
