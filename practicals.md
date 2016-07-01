@@ -463,7 +463,7 @@ bsub -q priority -o quast.out -e quast.err -J quast 'quast.py -R reference/lambd
 bsub -q priority -o quast.out -e quast.err -J quast 'quast.py -R reference/lambda_ref_genome.fa lambda_minion/canu/lambda.contigs.fasta lambda_minion/miniasm/contigs.fa lambda_RSII/canu/lambda.contigs.fasta lambda_RSII/miniasm/contigs.fa'
 -->
 
-The output is a directory, typically `quast_results/<date_of_launch>`, containing several files including a report in PDF format. Copy it to your local machine using `scp`. 
+The output is a directory, typically `quast_results/<date_of_launch>`, containing several files including a report in PDF format. Copy it to your local machine using `scp`: `scp username@prd.vital-it.ch:[path_to_file_on_vital_it] [path_to_file_on_laptop]`
 
 ![Question](img/round-help-button.png)
 What do you notice in this report? What did go wrong with the PacBio Canu assembly? Is the Miniasm assembly better? Compare the Canu assemblies made wiht both MinION and PacBio data: hwo does the error and indel rates compare?
@@ -534,7 +534,7 @@ bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/_Assembly_quality.
 ### Tools
 
 #### NanoOK
-This tool allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. This software was designed for MinION data, but it is easy to hack to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in the [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
+This tool allows to perform multiple analyses over MinION data, including the extraction of read sequences from `.fast5` files, their alignment to a reference, and the generation of a summary report of QC and mapping statistics. This software was designed for MinION data, but it is easy to "hack" it to use PacBio reads. Source code can be found on [GitHub](http://github.com/TGAC/NanoOK) and software usage is detailed in the [documentation](http://documentation.tgac.ac.uk/display/NANOOK/NanoOK).
 
 #### LAST
 LAST finds similar regions between sequences (local alignment). It is faster than BLAST and can handle largeer datasets. See the project [website](http://last.cbrc.jp/).
@@ -554,19 +554,35 @@ This is very fast, so probably no need to bsub...
 -->
 
 ![To do](img/wrench-and-hammer.png)
-Now launch the alignment with `LAST` (default aligner) using the `nanook align` utility. NanoOK expects a fasta file for each read, in a folder called `fasta/`. The commands in your submission script should look like this:
+Now launch the alignment with `LAST` (default aligner) using the `nanook align` utility. NanoOK expects a fasta file for each read, in a folder called `fasta/`, so we need a bit of file manipulation first. The commands in your submission script should look like this:
 
 ```sh
-mkdir lambda_minion/
-nanook_split_fasta -i input.fasta -o outputdir
+mkdir lambda_minion/fasta/
 
+# Extract the read headers and sequences only
+zcat lambda_minion/all_reads.fastq.gz | awk 'NR%4==1||NR%4==2' \
+  > lambda_minion/all_reads.fasta 
+
+# Convert header according to fasta specifications
+perl -p -i -e 's/^@/>/g' lambda_minion/all_reads.fasta 
+
+# split each read in a different file
+nanook_split_fasta -i lambda_minion/all_reads.fasta -o lambda_minion/fasta/
+
+# move reads to folders reflecting their type: 2D, template, complement
+mkdir lambda_minion/fasta/2D
+mkdir lambda_minion/fasta/Complement
+mkdir lambda_minion/fasta/Template
+find lambda_minion/fasta/ -maxdepth 1 -name \*_2d.fasta \
+  -exec mv {} lambda_minion/fasta/2D/ \;
+find lambda_minion/fasta/ -maxdepth 1 -name \*_template.fasta \
+  -exec mv {} lambda_minion/fasta/Template/ \;
+find lambda_minion/fasta/ -maxdepth 1 -name \*_complement.fasta \
+  -exec mv {} lambda_minion/fasta/Complement/ \;
+
+# Launch the alignment
 nanook align -s lambda_minion -r reference/lambda_ref_genome.fa
 ```
-
-
-bsub -q priority -o minion_extract.out -e minion_extract.err -R "rusage[mem=4096]" 'nanook extract [...]'
-
-
 
 ![Question](img/round-help-button.png)
 What directories have been created? What do they contain? Look at one randomly chosen alignment file. What is striking?
@@ -574,58 +590,35 @@ What directories have been created? What do they contain? Look at one randomly c
 ![Tip](img/elemental-tip.png)
 It is possible to specify to `nanook align` the alignment parameters to be used with `LAST`, with the `-alignerparams` option. By default the parameters are `-s 2 -T 0 -Q 0 -a 1`.
 
-### Bonus (or at home)
-You can try to align reads with other aligners. For example to use `BWA-MEM`, you first need to load the corresponding module on vital-IT (`module add UHTS/Aligner/bwa/0.7.13`), create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
-
-<!-- 
-TO DO?
-![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
-```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
-```
--->
+![Tip](img/elemental-tip.png)
+You can try to align reads through `NanoOK` with other aligners. For example to use `BWA-MEM`, you first need to create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
 
 ### Statistics and QC report
 ![To do](img/wrench-and-hammer.png)
-Launch the generation of the final report including QC and alignment statistics using the ```nanook analyse``` utility. A PDF file should be created in the ```latex_last_passfail/``` folder. If it's not the case, you can generate it yourself with the ```pdflatex file.tex``` command (press enter every time the program prompt you with a question).
+Launch the generation of the NanoOK alignment report including QC and alignment statistics using the ```nanook analyse``` utility. A PDF file should be created in the ```latex_last_passfail/``` folder. If it's not the case, you can generate it yourself with the ```pdflatex file.tex``` command (press enter every time the program prompt you with a question).
 
-<!--
-nanook analyse -s lambda_minion -r lambda_minion/reference/lambda_ref_genome.fa
+```sh 
+nanook analyse -s lambda_minion -r reference/lambda_ref_genome.fa
 pdflatex lambda_minion/latex_last_passfail/lambda_minion.tex
--->
-
-To download the report to your laptop:
-```sh
-scp username@prd.vital-it.ch:[path_to_file_on_vital_it] [path_to_file_on_laptop]
 ```
 
 ![Question](img/round-help-button.png)
-Take some time to read and understand the report. Here are a few questions that will guide you:
+Download the report to your laptop, and take some time to read and understand it. Here are a few questions that will guide you:
 * What size is the longest template read? Is that surprising?
-* What does the N50 values indicate us? Is that consistent with the size of the DNA fragments used to create the library?
+* What does the N50 values indicate us? Is that consistent with the size of the DNA fragments used to create the MinION library (~8kb)?
 * What is most common error type within reads?
-* In comparison, the typical error rate reported for the Illumina sequencing technology is around 0.1%. For Sanger sequencing, it can be as low as 0.001%... An interesting comparison of error rates across platforms was recently published: http://bib.oxfordjournals.org/content/17/1/154
+* In comparison, the typical error rate reported for the Illumina sequencing technology is around 0.1%. For Sanger sequencing, it can be as low as 0.001%... An interesting comparison of error rates across platforms was recently [published](http://bib.oxfordjournals.org/content/17/1/154).
 * Why is the alignment rate of 2D reads higher than those of template and complement reads?
 * Which are the most accurate: shortest or longest reads?
 * Have a look at the coverage plot. There is a "bump" in coverage around 45kb. This corresponds to some control spike-in DNA that was added during library preparation (more precisely around 3.6kb of a region of the lambda phage genome, with a single mutation G45352A). Can additional variation be explained by GC content differences?
-
-*TO DO: tell them to have a look at alignments in this region to see the mutation?*
-
 * Have a look at the k-mer over and under-representation analysis. What sort of k-mers are under-represented in 2D reads? Is that expected given how the technology works?
 
-### PacBio RS II
+<!-- 
+TO DO: tell them to have a look at alignments in this region to see the mutation?
+-->
 
 ### PacBio RS II
 It is quite easy to redo the above steps with PacBio data. Do it if you have time ;-) 
-
-<!-- 
-TO DO?
-![help](img/help.png) If you are lost, you can perform mapping of PacBio reads by executing
-```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/4_RSII_mapping.sh
-```
--->
-
 
 <!--
 TO DOs
