@@ -7,9 +7,7 @@ July 5th, 2016. University of Bern.
 
 https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longreads
 
-
 ## Contributors
-
 - Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB
 - Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB
 - Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB
@@ -423,7 +421,7 @@ What do you think about the length of this assembly?
 
 ![help](img/help.png) If you are lost, you can get the assembly based on PacBio reads by executing:
 ```sh
-bsub < /scratch/beefaskf/monthly/SIB_long_reads/2_RSII_Assembly.sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_RSII_Assembly.sh
 ```
 
 ## 3. Quality of assemblies
