@@ -96,7 +96,7 @@ Please have a look at [this short tutorial](https://github.com/aechchiki/SIB_Lon
 ## 1. Read extraction
 
 ### Formats
-The output of MinION and PacBio RS II are stored in Hierarchical Data Format, that is basically an archive format (such as `.zip` or `.tar`), but allowing a very quick access to its content (you can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). Those files include all details about reads and basecalling. What we need will need for this practical are just the sequences and their qualities, that can be stored in a simple `.fastq`.
+The output of MinION and PacBio RS II are stored in Hierarchical Data Format, that is basically an archive format (such as `.zip` or `.tar`), but allowing a very quick access to its content (you can find details on [wikipedia](https://en.wikipedia.org/wiki/Hierarchical_Data_Format)). Those files include all details about reads and basecalling. What you will need for this practical are just the sequences and their qualities, that can be stored in a simple `.fastq`.
 
 ![Tip](img/elemental-tip.png)
 The files saved in Hierarchical Data Format can be explored using HDF5 command-line tools:
@@ -109,7 +109,7 @@ h5stat <HDF_file> | less
 The MinION basecaller produces one file per read, which includes the time series of the measured ionic current used for basecalling, the basecalled template and complement read sequences, and the consensus 2D reads.
 
 #### bas.h5 and bax.h5
-The PacBio RS II system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell. The `bas.h5` file contains metadata. PacBio announced a change of data format to more classcial `.bam` files for the next platform (called *Sequel*), however all data produced by the RS II platform will be still in the `.h5` formats we are going to work with.
+The PacBio RS II system produces three `bax.h5` files and a `bas.h5` per SMRT cell. The three `bax.h5` files correspond to the first, second and third part of the movie capturing the SMRT cell. The `bas.h5` file contains metadata. PacBio announced a change of data format to more classcial `.bam` files for the next platform (called *Sequel*), however all data produced by the RS II platform will be still in the `.h5` formats you are going to work with.
 
 ### Tools
 All used tools are already installed on Vital-IT. Before the first use, you will just need to load the package.
@@ -189,7 +189,7 @@ Would be nice to know what we are dealing with. This is done quitelate (NanoOK a
 -->
 
 ![Tip](img/elemental-tip.png)
-We will not do this today, but for basic quality control of the reads, you can also launch the `fastqc` software (widely used for Illumina data) on this `fastq` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
+You will not do this today, but for basic quality control of the reads, you can also launch the `fastqc` software (widely used for Illumina data) on this `fastq` file. The reported statistics are correct, just keep in mind that warning flags in the report are meaningful for short reads, and sometimes not very informative for long reads.
 
 ![help](img/help.png) If you are lost, you can get extracted MinION reads by executing the following script. While the script is running, have a look at it to understand what is done.
 ```sh
@@ -258,7 +258,7 @@ Canu is an assembler for noisy long-reads sequences. It is a fork of Celera with
 Miniam is lightweight assembler. It very fast, but for a cost of simplicity and low parametrization. It can used as a first proxy of the data content, but for a final assembly, another assembler should be considered. As a first step, the overlap of reads is computed in a separated step using a standalone program called `minimap`.
 
 ### MinION
-We will assemble the lambda phage genome using only the 2D reads. 1D reads are of substantially lower quality, so we would like to avoid using them if we have enough 2D reads. Since we do (~3,000 reads, i.e., coverage of ~500X), the assembly should be trivial: the genome is 48.8 kb and we have some reads of 20kb. We expect only one contig!
+You will assemble the lambda phage genome using only the 2D reads. 1D reads are of substantially lower quality, so you would like to avoid using them if there are enough 2D reads. Since this is the case (~3,000 reads, i.e., coverage of ~500X), the assembly should be trivial: the genome is 48.8 kb and we have some reads of 20kb. We expect only one contig!
 
 #### Canu
 ![To do](img/wrench-and-hammer.png) Choose the appropriate parameters to run [Canu](http://canu.readthedocs.io/en/latest/commands/canu.html):
@@ -387,7 +387,7 @@ yes, PacBio reads are not assembled well. Maybe too much coverage? Quality of th
 -->
 
 #### Bonus: Miniasm
-Since the assembly with Canu does not seem to be successful, we will try a different assembler, `miniasm`.
+Since the assembly with Canu does not seem to be successful, you will try a different assembler, `miniasm`.
 
 ![To do](img/wrench-and-hammer.png)
 You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
@@ -434,7 +434,7 @@ bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_RSII_Assembly.sh
 
 ## 3. Quality of assemblies
 
-`Canu` produces a `.html` report for every performed step. You can find there the amount of reads after correction, filtering, etc. Miniasm, however does not provide such a report, therefore we will use `Quast` to estimate basic statistics of the all assemblies in a comparable format. Then we will map the assemblies to the lambda phage reference genome to inspect their quality.
+`Canu` produces a `.html` report for every performed step. You can find there the amount of reads after correction, filtering, etc. Miniasm, however does not provide such a report, therefore you will use `Quast` to estimate basic statistics of the all assemblies in a comparable format, and allow the comparison to the lambda phage reference genome to inspect their quality.
 
 ### Tools
 
@@ -647,17 +647,9 @@ module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 ```
 * Idea: make them download maf files and reference genome, and open in IGV... Or is it possible to generate a picture on vital-IT from IGV?
 
-* TO DO: export final HTML and send to Patricia for testing
-Fork to SIB github
-https://github.com/sib-swiss/2016-07-05-longreads-bern 
-
-* TO DO: cut lines of code that are too long
-
-* TO DO: git pull of scratch/beegfs/monthly/SIB_long_read_workshop/
-
-* TO DO: remove gzip commands?
-
-* TO DO: change "we to "you"
+* TO DO: - export final HTML and send to Patricia for testing
+         - Fork to SIB github: https://github.com/sib-swiss/2016-07-05-longreads-bern 
+         - git pull of scratch/beegfs/monthly/SIB_long_read_workshop/ before tuesday?
 
 * TO DO: test dee-hugemem with student account
 
