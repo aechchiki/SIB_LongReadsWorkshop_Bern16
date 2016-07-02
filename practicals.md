@@ -9,10 +9,13 @@ https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longre
 
 
 ## <sub>Contributors</sub>
-<sub>- Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
-<sub>- Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB</sub>
-<sub>- Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
-<sub>- Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
+<sub>Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
+
+<sub>Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB</sub>
+
+<sub>Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
+
+<sub>Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
 
 ## Introduction
 
