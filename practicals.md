@@ -7,13 +7,12 @@ July 5th, 2016. University of Bern.
 
 https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longreads
 
-<sub>
-## Contributors
-- Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB
-- Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB
-- Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB
-- Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB
-</sub>
+
+## <sub>Contributors</sub>
+<sub>- Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
+<sub>- Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB</sub>
+<sub>- Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
+<sub>- Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB</sub>
 
 ## Introduction
 
