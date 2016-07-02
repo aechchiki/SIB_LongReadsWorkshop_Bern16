@@ -7,11 +7,13 @@ July 5th, 2016. University of Bern.
 
 https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longreads
 
+<sub>
 ## Contributors
 - Amina Echchiki: Evolutionary Bioinformatics Group, UNIL and SIB
 - Walid Gharib: Interfaculty Bioinformatics Unit, UNIBE and SIB
 - Kamil Jaron: Evolutionary Bioinformatics Group, UNIL and SIB
 - Julien Roux: Evolutionary Bioinformatics Group, UNIL and SIB
+</sub>
 
 ## Introduction
 
@@ -31,7 +33,7 @@ After DNA fragmentation, the **MinION** library is prepared by ligating adapters
 TO DO: find a better picture of the read going through the pore?
 -->
 
-For **PacBio** sequencing (or **SMRT** sequencing), hairpin-form adapters (SMRTbell) are ligated on both sides of double-stranded DNA fragments, forming a circular sequence. Circular sequences attach to the bottom of theSMRT cell wells, and are continuously read, and a movie is recorded. Nowadays, the total length of movie allows to record up to 75,000 nucleotide basecalls. This implies that short DNA fragments will be read many times, while long fragments may be read just one or twice. The complete sequence is called a *polymerase* read. After the adapter sequences are removed, the sequence is split into *subreads*. The consensus of subreads is called a *circular consensus read* or *read of insert*.
+For **PacBio** sequencing (or **SMRT** sequencing), hairpin-form adapters (SMRTbell) are ligated on both sides of double-stranded DNA fragments, forming a circular sequence. Circular sequences attach to the bottom of the SMRT cell wells, and are continuously read, and a movie is recorded. Nowadays, the total length of movie allows to record up to 75,000 nucleotide basecalls. This implies that short DNA fragments will be read many times, while long fragments may be read just one or twice. The complete sequence is called a *polymerase* read. After the adapter sequences are removed, the sequence is split into *subreads*. The consensus of subreads is called a *circular consensus read* or *read of insert*.
 
 ![protocol](img/pb_reads.png)
 
