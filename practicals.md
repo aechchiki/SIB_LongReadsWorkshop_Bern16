@@ -157,6 +157,7 @@ Choose one file at random in the ```fastq/2D``` folder and compare the quality s
 ![To do](img/wrench-and-hammer.png)
 You will convert the MinION raw reads from their `.fast5` to a more classical and readable `.fastq`. This can be done with the `poretools fastq` utility. To find out which options to use, please refer to the [documentation](http://poretools.readthedocs.io/en/latest/content/examples.html#poretools-fastq), or type `poretools fastq -h`. For now, we are interested in extracting all types of reads (template, complement and 2D), so check out the option `--type`. Be careful, the output `.fastq` file is written in the standard output, so you need to save the standard output to a file using `>`. For example: 
 ``` sh
+module add UHTS/Analysis/poretools/0.5.1
 poretools fastq [...] > lambda_minion/all_reads.fastq
 ## And even better you can add a step to compress the output file:
 gzip -9 lambda_minion/all_reads.fastq
@@ -165,7 +166,6 @@ gzip -9 lambda_minion/all_reads.fastq
 ![Warning](img/warning.png)
 **Remember, that it is not allowed to launch your command on the frontal machine!** You need to write the above commands in a bash script (called for example `minion_extract.sh`) that you will submit to the cluster with `bsub` (see [Submitting commands to the cluster](#submitting-commands-to-the-cluster)):
 ```sh
-module add UHTS/Analysis/poretools/0.5.1
 bsub < minion_extract.sh
 ```
 
@@ -218,6 +218,8 @@ Answer: 1
 ![To do](img/wrench-and-hammer.png)
 Extract PacBio subreads using `bash5tools.py` from `pbh5tools`. Again, refer to the [documentation](https://github.com/PacificBiosciences/pbh5tools/blob/master/doc/index.rst). The commands will look like this:
 ```sh
+module add UHTS/PacBio/pbh5tools/0.8.0
+
 bash5tools.py <file.bas.h5> \
   --outFilePrefix lambda_RSII/<prefix_for_extracted_reads> \
   --readType subreads \
@@ -227,7 +229,6 @@ gzip -9 lambda_RSII/[prefix.fastq]
 ```
 Put the full command in a script and submit it using bsub:
 ```sh
-module add UHTS/PacBio/pbh5tools/0.8.0
 bsub < pacbio_extract.sh
 ```
 <!--
@@ -263,6 +264,8 @@ You will assemble the lambda phage genome using only the 2D reads. 1D reads are 
 #### Canu
 ![To do](img/wrench-and-hammer.png) Choose the appropriate parameters to run [Canu](http://canu.readthedocs.io/en/latest/commands/canu.html):
 ```
+module add UHTS/Assembler/canu/1.3; # load canu software 
+
 usage: canu -p <assembly-prefix>    # use a specified prefix to name canu output files
             -d <assembly-directory> # use a specified prefix for output directories
             genomeSize=<number>     # expected genome size
@@ -273,7 +276,6 @@ usage: canu -p <assembly-prefix>    # use a specified prefix to name canu output
 
 Put the full command in a script and submit it using bsub:
 ```sh
-module add UHTS/Assembler/canu/1.3;
 bsub < minion_assembly_canu.sh
 ```
 
@@ -321,6 +323,9 @@ bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm '
 
 Then, to perform the assembly using `miniasm`:
 ```sh
+module add UHTS/Analysis/minimap/0.2.r124.dirty; # load module minimap
+module add UHTS/Analysis/miniasm/0.2.r137.dirty; # load module minimap
+
 miniasm -f <reads.fq> <overlaps.gz> > <contigs.gfa>
 ## convert .gfa to .fasta
 awk '/^S/{print ">"$2"\n"$3}' <contigs.gfa> | fold > <contigs.fa>
@@ -333,8 +338,6 @@ awk '/^S/{print ">"$2"\n"$3}' lambda_minion/miniasm/contigs.gfa | fold > lambda_
 
 Put these commands in a script and submit it using bsub:
 ```sh
-module add UHTS/Analysis/minimap/0.2.r124.dirty;
-module add UHTS/Analysis/miniasm/0.2.r137.dirty;
 bsub < minion_assembly_miniasm.sh
 ```
 
@@ -405,6 +408,9 @@ bsub -q priority -o RSII_miniasm.out -e RSII_miniasm.err -J RSII_miniasm 'mkdir 
 ![To do](img/wrench-and-hammer.png)
 Then, to perform the assembly using `miniasm`:
 ```sh
+module add UHTS/Analysis/minimap/0.2.r124.dirty; # load module minimap
+module add UHTS/Analysis/miniasm/0.2.r137.dirty; # load module minimap
+
 miniasm -f <reads.fq> <overlaps.gz> > <contigs.gfa>
 ## convert .gfa to .fasta
 awk '/^S/{print ">"$2"\n"$3}' <contigs.gfa> | fold > <contigs.fa>
@@ -418,8 +424,6 @@ awk '/^S/{print ">"$2"\n"$3}' lambda_RSII/miniasm/contigs.gfa | fold > lambda_RS
 
 Put these commands in a script and submit it using bsub:
 ```sh
-module add UHTS/Analysis/minimap/0.2.r124.dirty;
-module add UHTS/Analysis/miniasm/0.2.r137.dirty;
 bsub < RSII_assembly_miniasm.sh
 ```
 ![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes corresponds to the number of nucleotides, newline characters and characters in headers. This is useful to roughly estimate the length of an assembly. Ortherwise you can remove the header with tail and count the number of nucleotides: `tail -n+2 lambda_RSII/miniasm/contigs.fa | wc -m`
@@ -456,6 +460,9 @@ ln -s NC_001416.fna lambda_ref_genome.fa
 ### Running Quast
 The command in your submission script should look something like this:
 ```sh
+module add UHTS/Quality_control/quast/4.1  # load quast module
+
+
 quast.py 
   -R <path to reference genome> 
   <path to Canu MinION assembly> 
@@ -464,9 +471,8 @@ quast.py
 ```
 
 ![To do](img/wrench-and-hammer.png)
-You can submit your script after loading the appropriate module: 
+Put these commands in a script and submit it using bsub: 
 ```sh
-module add UHTS/Quality_control/quast/4.1
 bsub < quast.sh
 ```
 
@@ -495,6 +501,9 @@ It would be interesting to know more precisely what is going on with PacBio asse
 
 ```sh
 mkdir mummer/
+
+module add UHTS/Analysis/MUMmer/3.23; # load quast module
+
 mummer -mum -b -c <assembly_1.fa> <assembly_2.fa> > 
   mummer/<assembly_1_vs_2.mums>
 ```
@@ -522,9 +531,9 @@ bsub -q priority -o mummer.out -e mummer.err -J mummer 'mummerplot -postscript -
 -->
 
 ![To do](img/wrench-and-hammer.png)
-Write a script to perform the comparison of all assemblies to the reference genome. You can submit your script after loading the appropriate module: 
+Write a script to perform the comparison of all assemblies to the reference genome:
+
 ```sh
-module add UHTS/Analysis/MUMmer/3.23;
 bsub < mummer.sh
 ```
 
