@@ -62,7 +62,7 @@ You are in! Jump to [Setting up your working directory](#setting-up-your-working
 
 You should first install a ssh client (e.g., `PuTTY`). If you already have one, we assume you know how to use it. Connect to Vital-IT and jump to [Setting up your working directory](#setting-up-your-working-directory).
 
-If you do not have a ssh client, follow [these steps](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it_connect_Putty.pdf). 
+If you do not have a ssh client, follow [these steps](vital-it_connect_Putty.pdf). 
 
 ### Setting up your working directory
 
@@ -648,22 +648,11 @@ It is quite easy to redo the above steps with PacBio data. Do it if you have tim
 TO DOs
 * check this paper https://dx.doi.org/10.7554/eLife.14258
 * check the porecamp material (analysis part): http://porecamp.github.io/timetable.html
-* Check Pradervand talk: http://edu.isb-sib.ch/pluginfile.php/3390/course/section/1574/Pradervand_Sequencing_CUSO2015.pdf
-* Will these modules be needed?
-```sh
-module add UHTS/PacBio/blasr/20140829;
-module add UHTS/Analysis/samtools/1.3 # load samtools (alignment)
-module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
-```
-* Idea: make them download maf files and reference genome, and open in IGV... Or is it possible to generate a picture on vital-IT from IGV?
-
+* check Pradervand talk: http://edu.isb-sib.ch/pluginfile.php/3390/course/section/1574/Pradervand_Sequencing_CUSO2015.pdf
 * TO DO: - export final HTML and send to Patricia for testing
-         - Fork to SIB github: https://github.com/sib-swiss/2016-07-05-longreads-bern 
+         - Fork to SIB github? https://github.com/sib-swiss/2016-07-05-longreads-bern 
+           Only put .html pages, vital-it_connect_Putty.pdf, img/ and scripts/ folder
          - git pull of scratch/beegfs/monthly/SIB_long_read_workshop/ before tuesday?
 
-![Question](img/round-help-button.png)
-![Tip](img/elemental-tip.png)
-![To do](img/wrench-and-hammer.png)
-![Warning](img/warning.png)
 -->
 
