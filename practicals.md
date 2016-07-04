@@ -83,7 +83,7 @@ mkdir <username>; cd <username>
 
 ### Submitting commands to the cluster
 
-It is not allowed to launch any calculation on the frontal machine where you are connected (```prd.vital-it.ch```). You need to submit each job for batched execution through a job scheduler that will dispatch it on the cluster nodes. For example:
+**It is not allowed to launch any calculation on the frontal machine where you are connected (```prd.vital-it.ch```)**. You need to submit each job for batched execution through a job scheduler that will dispatch it on the cluster nodes. For example:
 ```sh
 bsub '[my command line here]'
 ```
@@ -91,7 +91,7 @@ Or, better, write your commands in a script and submit it with:
 ```sh
 bsub < script.sh
 ```
-Please have a look at [this short tutorial](https://github.com/aechchiki/SIB_LongReadsWorkshop_Bern16/blob/master/vital-it-usage.md) to help you write such a script yourself, with the `Nano` text editor. To save you some typing, a skeleton of a submission script can be found [here](scripts/skeleton.sh) ;)  
+Please have a look at [this short tutorial](vital-it-usage.html) to help you write such a script yourself, with the `Nano` text editor. To save you some typing, a skeleton of a submission script can be found [here](scripts/skeleton.sh) ;)  
 
 ## 1. Read extraction
 
@@ -660,8 +660,6 @@ module add UHTS/Analysis/seqtk/2015.10.15 # fastq to fasta
 * TO DO: - export final HTML and send to Patricia for testing
          - Fork to SIB github: https://github.com/sib-swiss/2016-07-05-longreads-bern 
          - git pull of scratch/beegfs/monthly/SIB_long_read_workshop/ before tuesday?
-
-* TO DO: test dee-hugemem with student account
 
 ![Question](img/round-help-button.png)
 ![Tip](img/elemental-tip.png)
