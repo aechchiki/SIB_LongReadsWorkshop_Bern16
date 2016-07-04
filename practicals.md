@@ -611,10 +611,11 @@ nanook align -s lambda_minion -r reference/lambda_ref_genome.fa
 What directories have been created? What do they contain? Look at one randomly chosen alignment file. What is striking?
 
 ![Tip](img/elemental-tip.png)
-It is possible to specify to `nanook align` the alignment parameters to be used with `LAST`, with the `-alignerparams` option. By default the parameters are `-s 2 -T 0 -Q 0 -a 1`.
+* It is possible to specify to `nanook align` the alignment parameters to be used with `LAST`, with the `-alignerparams` option. By default the parameters are `-s 2 -T 0 -Q 0 -a 1`.
 
-![Tip](img/elemental-tip.png)
-You can try to align reads through `NanoOK` with other aligners. For example to use `BWA-MEM`, you first need to create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
+* If you want, you can use the lambda phage genome assembly you created today as a reference for the alignment.
+
+* You can try to align reads with other aligners. For example to use `BWA-MEM`, you first need to create the index of the reference sequence (`bwa index reference.fasta`). Then you can relaunch `nanook align` with the `-aligner bwa` option.
 
 ### Statistics and QC report
 ![To do](img/wrench-and-hammer.png)
