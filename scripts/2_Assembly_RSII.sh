@@ -16,7 +16,6 @@
 ## prepare directory
 # define working directory for user
 work_dir=/scratch/beegfs/weekly/$USER
-mkdir -p $work_dir
 # prepare assembly directory
 mkdir -p $work_dir/lambda_RSII/assembly_canu/
 
