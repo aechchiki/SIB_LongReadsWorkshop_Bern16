@@ -476,11 +476,6 @@ Put these commands in a script and submit it using bsub:
 bsub < quast.sh
 ```
 
-![help](img/help.png) If you are lost, you can get the quality report for your assemblies by executing:
-```sh
-bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/3_AssemblyQuality.sh
-```
-
 <!--
 bsub -q priority -o quast.out -e quast.err -J quast 'quast.py -R reference/lambda_ref_genome.fa lambda_minion/canu/lambda.contigs.fasta lambda_RSII/canu/lambda.contigs.fasta lambda_RSII/miniasm/contigs.fa'
 
@@ -491,6 +486,11 @@ The output is a directory, typically `quast_results/<date_of_launch>`, containin
 
 ![Question](img/round-help-button.png)
 What do you notice in this report? What did go wrong with the PacBio Canu assembly? Is the Miniasm assembly better? Compare the Canu assemblies made wiht both MinION and PacBio data: hwo does the error and indel rates compare?
+
+![help](img/help.png) If you are lost, you can get the quality report for your assemblies by executing:
+```sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/3_AssemblyQuality.sh
+```
 
 <!--
 Answers: 
