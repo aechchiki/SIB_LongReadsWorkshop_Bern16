@@ -345,7 +345,7 @@ bsub < minion_assembly_miniasm.sh
 
 ![help](img/help.png) If you are lost, you can get the assembly of MinION reads by executing:
 ```sh
-bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_MinION_Assembly.sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_Assembly_MinION.sh
 ```
 
 <!--
@@ -433,7 +433,7 @@ What do you think about the length of this assembly?
 
 ![help](img/help.png) If you are lost, you can get the assembly based on PacBio reads by executing:
 ```sh
-bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_RSII_Assembly.sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_Assembly_RSII.sh
 ```
 
 ## 3. Quality of assemblies
@@ -474,6 +474,11 @@ quast.py
 Put these commands in a script and submit it using bsub: 
 ```sh
 bsub < quast.sh
+```
+
+![help](img/help.png) If you are lost, you can get the quality report for your assemblies by executing:
+```sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/3_AssemblyQuality.sh
 ```
 
 <!--
