@@ -311,7 +311,7 @@ bsub -q dee-hugemem -o minion_canu_hugemem.out -e minion_canu_hugemem.err -J min
 -->
 
 <!-- 
-I commented out the Miniasm assembly for MinIOn since it is done for pacbio below
+I commented out the Miniasm assembly for MinION since it is done for pacbio below
 
 #### Bonus: Miniasm
 ![To do](img/wrench-and-hammer.png) You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
@@ -322,9 +322,7 @@ minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> |
   <overlaps.gz>
 ```
 
-<!--
 bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm 'mkdir lambda_minion/miniasm/; minimap -S -w 5 -L 100 -m 0 lambda_minion/all_reads.fastq.gz lambda_minion/all_reads.fastq.gz | gzip -9 > lambda_minion/miniasm/overlaps.gz'
--->
 
 Then, to perform the assembly using `miniasm`:
 ```sh
@@ -336,10 +334,8 @@ miniasm -f <reads.fq> <overlaps.gz> > <contigs.gfa>
 awk '/^S/{print ">"$2"\n"$3}' <contigs.gfa> | fold > <contigs.fa>
 ```
 
-<!--
 bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm 'miniasm -f lambda_minion/all_reads.fastq.gz lambda_minion/miniasm/overlaps.gz > lambda_minion/miniasm/contigs.gfa'
 awk '/^S/{print ">"$2"\n"$3}' lambda_minion/miniasm/contigs.gfa | fold > lambda_minion/miniasm/contigs.fa
--->
 
 Put these commands in a script and submit it using bsub:
 ```sh
@@ -353,7 +349,6 @@ bsub < minion_assembly_miniasm.sh
 bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_Assembly_MinION.sh
 ```
 
-<!--
 **Miniasm assembly of MinION reads is only 29kb -> only use miniasm with pacbio (since canu doesn't give an assembly of the rigth size)**
 -->
 

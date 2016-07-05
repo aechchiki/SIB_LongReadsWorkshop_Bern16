@@ -342,7 +342,7 @@ Copy this folderto SIB_long_reads folder on scratch
 bsub -q dee-hugemem -o minion_canu_hugemem.out -e minion_canu_hugemem.err -J minion_canu_hugemem -v 20000000 -R "rusage[swp=20000]" -M 10000000 -R "rusage[mem=10000]" 'canu -p lambda -d lambda_minion/canu/ genomeSize=49k -nanopore-raw lambda_minion/all_reads.fastq.gz useGrid=false'
 -->
 <!-- 
-I commented out the Miniasm assembly for MinIOn since it is done for pacbio below
+I commented out the Miniasm assembly for MinION since it is done for pacbio below
 
 #### Bonus: Miniasm
 ![To do](img/wrench-and-hammer.png) You first need to compute the overlaps of reads using `minimap`. As recommended in the [documentation](https://github.com/lh3/miniasm), put the following command and parameters in your submission script:
@@ -353,26 +353,33 @@ minimap -S -w 5 -L 100 -m 0 <reads.fq> <reads.fq> |
   <overlaps.gz>
 ```
 
-<!--
 bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm 'mkdir lambda_minion/miniasm/; minimap -S -w 5 -L 100 -m 0 lambda_minion/all_reads.fastq.gz lambda_minion/all_reads.fastq.gz | gzip -9 > lambda_minion/miniasm/overlaps.gz'
--->
-<p>Then, to perform the assembly using <code>miniasm</code>:</p>
-<pre class="sh"><code>module add UHTS/Analysis/minimap/0.2.r124.dirty; # load module minimap
+
+Then, to perform the assembly using `miniasm`:
+```sh
+module add UHTS/Analysis/minimap/0.2.r124.dirty; # load module minimap
 module add UHTS/Analysis/miniasm/0.2.r137.dirty; # load module minimap
 
-miniasm -f &lt;reads.fq&gt; &lt;overlaps.gz&gt; &gt; &lt;contigs.gfa&gt;
+miniasm -f <reads.fq> <overlaps.gz> > <contigs.gfa>
 ## convert .gfa to .fasta
-awk '/^S/{print &quot;&gt;&quot;$2&quot;\n&quot;$3}' &lt;contigs.gfa&gt; | fold &gt; &lt;contigs.fa&gt;</code></pre>
-<!--
+awk '/^S/{print ">"$2"\n"$3}' <contigs.gfa> | fold > <contigs.fa>
+```
+
 bsub -q priority -o minion_miniasm.out -e minion_miniasm.err -J minion_miniasm 'miniasm -f lambda_minion/all_reads.fastq.gz lambda_minion/miniasm/overlaps.gz > lambda_minion/miniasm/contigs.gfa'
 awk '/^S/{print ">"$2"\n"$3}' lambda_minion/miniasm/contigs.gfa | fold > lambda_minion/miniasm/contigs.fa
--->
-<p>Put these commands in a script and submit it using bsub:</p>
-<pre class="sh"><code>bsub &lt; minion_assembly_miniasm.sh</code></pre>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAuQAAALkB4qdB6AAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAMxSURBVFiFvZfNS5RRFMZ/Z2YIPxPCKBEyUAQ3gvQlrQInWrQQgoSWLXQVWCH9Ca1atPBPqAgSXEsSIglRCi4Cg0RmM5pYUYr4UXhavOdlrnfu+zpvWAcOM/Occ57zzJn73ntHVBURmQYOgNuq+pN/aCLSArwCcqpaLBh+AFwHpkTkRpoIETkJXAQuAZcNfg98AOZVdfOI5lPAFeA1AKoK0AK8A9ReG1QV14Eu4I2J1QQ/sJyuQH2D16NFVXETXBFFB88B94Fti60Az4BR4Kr5qGErlrNtWM7hKfrNDwlwVBaBvH1uBGatcBd4FMdCDuQtZ9dqZoFGJ1b0pxskcgjHjWge6EnL9ep6rEaB8dTcFJIB+03XgdZamzv1rVZ7AAxkEgA0AyX7BreyNnd4bhlHCWjOImDECl/+bXOH66VxjYTiOcJ2wV6fJ8SzWMxxIRQ8SsDCMQiIOYICxMZUAUROAFvAd1VtOwYBiMgacIpoHey7sdAEOoATwPJxNDdbNs4OP1CozqXsCKkyETkDJE1mTVXXA3jMVa6KJKzcVaKV2+Th56hsySHfBs55NU0WWw31Ck0A4KN9y35g2sE3qUxtAdiw96eJFlnBclzrdzir7YgNZC4Qm7DYAwd7YNhEIH+OlA0tSUAO+GyFg17spuGTDjZp2E0vd9Dwzzgn45ECrHjIijeAXgfPEz2m3wAx/2ZY3snrtVoFhjKdBQ7JYyP4CvQ5eHzunzJXYMWJ91mNAo9Te3gN24F7QL19FuCFEe0AT4kW54JhZ83VsDbL2THsBZXNrt6424MCgPNUTsCiJ2zYRhwL+WHv75qrYXHjLWDY44hvRCXg/CEBXvNXBG49QDfJz7/v3YH6vHEfEhEHF53mhYT1UGc5ZeAa0ZH9xHzEsLLl1CVwFBwRi+5G9Jbo/vZQVX+Tbr9UdQaY8QMi8iutUFV/i8gdYI34HEpboQkTKKXklNImEPKk+8B/s6SzIM3aReRTUiwrWdWFJDFRpI7oMavF6lV1t5bELD/BHtHFYg/oJNpYXO/0cmqzWheLTWqMaJHtA18837fYWCbOjAIaiP4nLlG9+SxZrOqPbZr/Acin3r66y1JbAAAAAElFTkSuQmCC" alt="Tip" /> The size of the <code>.fasta</code> file in bytes corresponds to the number of nucleotides, newline characters and characters in headers. This is useful to roughly estimate the length of an assembly.</p>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAAjCAYAAADxG9hnAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAqFJREFUeNrslluITVEYx+3BTC6HUmNcSsqDcRmXYR7mASPmwZ1J8zYPIyQ1LzxIeeDhFA/kEk1DMUQuIRMjGnLJPanzIEQphdzG5M4c2++r/6lld87Z52SUtHf9Hva31l7rv77/961zPN/3u/0LjxcJiYREQiIh/4uQglClnlcAK6E471N6XjksyGmyZSQbPBU2DRrD5ga+s0M+gFc5zc9hQQ8S8AVK8hCySAfY1iVCtGidFo2nGRsE/dLEr8MPGN6VQgotxaLQia+Fn/AVapz4JAk/mXMG80h1XIvX6b1Idvki4czdq9iMvyGkRBsn9N4D3jlCbig+FL7B3byKO1iYIUW7X5tOU6wGXsNDmKzYBs2pz7ZeRiE8pTrJTSh3WnAZPFbhPdUmx2TNRuiAl7AOesFzSMIt6IT7UOvsUwX34P1v9Rbo+znQCp9gq6Vbi223xeC2hHTqjngDDRLxUYJTVl2AxU69HIcD+vYwTM1mzWjoA6vgGhyEiTAAxkJMRWsCG2EIjIDBMM66BC7DcmXHYv3BbtdzcF529rXvMlkzQcqtRasU6w7r1Z4WeGJiNWaCjyhuLbzb5musEp5pzDLVELjo2mV1USZrqqFF3bET7uiDzbBQmXgr2x5J9ApYAx/gKuyRcMvAfGiS0BZZkpRFldmsGa/0m++XYB+UwUBZFFNXXIEdaumRMAzGwFFogyXQ24pets6G06q/ebKrNMwaO/FM566Iq5t8dU2ZxmKqiZQ1zTZfY1PUPfbyGVY7+9Sq0zJaY/fEdDih1Dapzb7DJpir1LfLNquXF7BUxd0h65ol/IwysUtCW9U5SXVSRejNKt/bVICjnHhPtepF2ALFgXvoEJxN/Qw4Y9XK3imYlW7P6K9iJCQSEgn50+eXAAMA8yquiwasZlgAAAAASUVORK5CYII=" alt="help" /> If you are lost, you can get the assembly of MinION reads by executing:</p>
-<pre class="sh"><code>bsub &lt; /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_Assembly_MinION.sh</code></pre>
-<!--
+
+Put these commands in a script and submit it using bsub:
+```sh
+bsub < minion_assembly_miniasm.sh
+```
+
+![Tip](img/elemental-tip.png) The size of the `.fasta` file in bytes corresponds to the number of nucleotides, newline characters and characters in headers. This is useful to roughly estimate the length of an assembly.
+
+![help](img/help.png) If you are lost, you can get the assembly of MinION reads by executing:
+```sh
+bsub < /scratch/beegfs/monthly/SIB_long_read_workshop/scripts/2_Assembly_MinION.sh
+```
+
 **Miniasm assembly of MinION reads is only 29kb -> only use miniasm with pacbio (since canu doesn't give an assembly of the rigth size)**
 -->
 </div>
