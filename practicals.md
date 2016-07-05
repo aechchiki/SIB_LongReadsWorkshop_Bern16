@@ -284,16 +284,21 @@ bsub -q priority -o minion_canu.out -e minion_canu.err -J minion_canu 'canu -p l
 -->
 
 The output directory contains many files. The most interesting ones are:
-- *.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
-- *.trimmedReads.fastq : file containing the sequences after correction and final trimming
-- *.layout : file containing informations about read inclusion in the final assembly
-- *.gfa : file containing the assembly graph by Canu
-- *.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
+
+- \*.correctedReads.fasta.gz : file containing the input sequences after correction, trim and split based on consensus evidence. 
+
+- \*.trimmedReads.fastq : file containing the sequences after correction and final trimming
+
+- \*.layout : file containing informations about read inclusion in the final assembly
+
+- \*.gfa : file containing the assembly graph by Canu
+
+- \*.contigs.fasta: file containing everything that could be assembled and is part of the primary assembly
 
 ![Question](img/round-help-button.png) How many contigs were produced? Does the total size seem to match your expectations?
 <!--
 Answer: 1, yes
-->
+-->
 
 ![Warning](img/warning.png)
 During our tests, the assembly did not always work. Sometimes the job was killed by the cluster, please check carefully the standard output and error files. We think that the memory requirement of Canu might be too big for some machines of the cluster. If this happens to you, rerun the job using the queue `dee-hugemem` instead of the queue `priority`. It night be useful to increase the amount of memory requested with the options `-v 20000000 -R "rusage[swp=20000]"` and `-M 10000000 -R "rusage[mem=10000]"`. If this still does not work, you can see a successful run that we pre-computed in the folder `/scratch/beegfs/monthly/jroux/tp_long_reads/lambda_minion/canu/`.
