@@ -18,4 +18,8 @@ Contributors:
 - Julien Roux: Evolutionary Bioinformatics Group, UniL and SIB
 
 More info about the event:
-https://www.isb-sib.ch/training/upcoming-training-events/training/2016-07-longreads
+https://edu.isb-sib.ch/course/view.php?id=256
+
+#### Long Reads Workshop Zurich 2017
+
+https://github.com/aechchiki/SIB_LongReadsWorkshop_Zurich17
